@@ -1,0 +1,11 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <Color x:Key="FlatUIDark">#2C3E50</Color>
+    <SolidColorBrush x:Key="FlatUIDarkBrush" Color="{StaticResource FlatUIDark}" />
+    <Color x:Key="FlatUIBlack">#34495E</Color>
+    <SolidColorBrush x:Key="FlatUIBlackBrush" Color="{StaticResource FlatUIBlack}" />
+    <Color x:Key="FlatUIRed">#E74C3C</Color>
+    <SolidColorBrush x:Key="FlatUIRedBrush" Color="{StaticResource FlatUIRed}" />
+    
+</ResourceDictionary>
