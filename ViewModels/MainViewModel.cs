@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using Mafia_panel.Core;
 using Mafia_panel.Models;
@@ -24,12 +20,15 @@ namespace Mafia_panel.ViewModels
 			set => SetProperty(ref _currentViewModel, value);
 		}
 
-		public MainViewModel()
+		Window _window;
+
+		public MainViewModel(Window window)
 		{
 			_discordClient = new HollowDiscord();//DiscordClientModel();
 			_players = new ObservableCollection<Player>();
 			_mode = new ModeModel();
-			CurrentViewModel = new InitialViewModel(_players,_mode, InitialSave, InitialConfigure); 
+			CurrentViewModel = new InitialViewModel(_players, _mode, InitialSave, InitialConfigure);
+			_window = window;	
 		}
 
 		void Inherit()
@@ -37,7 +36,7 @@ namespace Mafia_panel.ViewModels
 			var selectedPlayers = new List<int>();
 			var seed = new Random();
 			var random = new Random(seed.Next());
-			foreach (Player player in _players) if (player.Role == PlayerRole.Vivisector) selectedPlayers.Add(_players.IndexOf(player));
+			foreach (Player player in _players) if (player.Role == PlayerRole.Mafiozo) selectedPlayers.Add(_players.IndexOf(player));
 			if (selectedPlayers.Count == 0) return;
 			var curatorNum = selectedPlayers[random.Next(selectedPlayers.Count)];
 			_players[curatorNum] = new Curator(_players[curatorNum], Inherit);
@@ -46,17 +45,17 @@ namespace Mafia_panel.ViewModels
 		{
 			_playersBackup = new ObservableCollection<Player>(_players);
 			_discordClient.SendInitialStatus(_players, _mode);
-			for(int i=0; i<_players.Count; i++)
+			for (int i = 0; i < _players.Count; i++)
 			{
 				switch (_players[i].Role)
 				{
-					case PlayerRole.Curator:
+					case PlayerRole.Godfather:
 						_players[i] = new Curator(_players[i], Inherit);
 						break;
-					case PlayerRole.Resuscitator:
+					case PlayerRole.Doctor:
 						_players[i] = new Resuscitator(_players[i]);
 						break;
-					case PlayerRole.Anesthesiologist:
+					case PlayerRole.Prostitute:
 						_players[i] = new Anesthesiologist(_players[i]);
 						break;
 					case PlayerRole.Chief:
@@ -75,7 +74,7 @@ namespace Mafia_panel.ViewModels
 			var badGuys = 0; var goodGuys = 0; var psycho = 0;
 			foreach (var player in _players)
 			{
-				if (player.Role == PlayerRole.Vivisector || player.Role == PlayerRole.Curator) badGuys++;
+				if (player.Role == PlayerRole.Mafiozo || player.Role == PlayerRole.Godfather) badGuys++;
 				else if (player.Role == PlayerRole.Psychopath) psycho++;
 				else goodGuys++;
 			}
@@ -91,9 +90,9 @@ namespace Mafia_panel.ViewModels
 			}
 			return false;
 		}
-		void Win(bool isVivisectorsWins)
+		void Win(bool isMafiaWins)
 		{
-			if (isVivisectorsWins) _discordClient.Send("<@&977568272029478962> Game over, bad guys wins", 915884902401073152);
+			if (isMafiaWins) _discordClient.Send("<@&977568272029478962> Game over, bad guys wins", 915884902401073152);
 			else _discordClient.Send("<@&977568272029478962> Game over, good guys wins", 915884902401073152);
 			_players = new ObservableCollection<Player>(_playersBackup);
 			_discordClient.SendStatus(_playersBackup, 915884902401073152);
@@ -127,6 +126,24 @@ namespace Mafia_panel.ViewModels
 				else player.Status = PlayerStatus.None;
 			}
 			CurrentViewModel = new DayViewModel(DayEnd, _players);
+		}
+
+		private RelayCommand _minimizeCommand;
+		public RelayCommand MinimizeCommand
+		{
+			get => _minimizeCommand ?? (_minimizeCommand = new RelayCommand(obj =>	_window.WindowState= WindowState.Minimized));
+		}
+
+		private RelayCommand _maximizeCommand;
+		public RelayCommand MaximizeCommand
+		{
+			get => _maximizeCommand ?? (_maximizeCommand = new RelayCommand(obj => _window.WindowState ^= WindowState.Maximized));
+		}
+
+		private RelayCommand _closeCommand;
+		public RelayCommand CloseCommand
+		{
+			get => _closeCommand ?? (_closeCommand = new RelayCommand(obj => _window.Close()));
 		}
 	}
 }

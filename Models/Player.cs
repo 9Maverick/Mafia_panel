@@ -25,11 +25,11 @@ namespace Mafia_panel.Models
     public enum PlayerRole
     {
         None,
-        Patient,
-        Vivisector,
-        Curator,
-        Resuscitator,
-        Anesthesiologist,
+        Civilian,
+        Mafiozo,
+        Godfather,
+        Doctor,
+        Prostitute,
         Chief,          
         Psychopath
     }
@@ -172,7 +172,7 @@ namespace Mafia_panel.Models
             User = player.User;
             Id = player.Id;
             Name = player.Name;
-            Role = PlayerRole.Resuscitator;
+            Role = PlayerRole.Doctor;
             Status = player.Status;
         }
         private int _selfDefends = 0;
@@ -212,7 +212,7 @@ namespace Mafia_panel.Models
             User = player.User;
             Id = player.Id;
             Name = player.Name;
-            Role = PlayerRole.Anesthesiologist;
+            Role = PlayerRole.Prostitute;
             Status = player.Status;
         }
         /// <summary>
@@ -272,7 +272,7 @@ namespace Mafia_panel.Models
             User = player.User;
             Id = player.Id;
             Name = player.Name;
-            Role = PlayerRole.Curator;
+            Role = PlayerRole.Godfather;
             Status = player.Status;
         }
         /// <summary>
@@ -321,11 +321,11 @@ namespace Mafia_panel.Models
         public static readonly Dictionary<PlayerRole, string> RoleTemplates = new Dictionary<PlayerRole, string>
         {
             { PlayerRole.Chief, "" },
-            { PlayerRole.Patient, "" },
-            { PlayerRole.Curator,  "" },
-            { PlayerRole.Vivisector,  "" },
-            { PlayerRole.Resuscitator, "" },
-            { PlayerRole.Anesthesiologist, "" },
+            { PlayerRole.Civilian, "" },
+            { PlayerRole.Godfather,  "" },
+            { PlayerRole.Mafiozo,  "" },
+            { PlayerRole.Doctor, "" },
+            { PlayerRole.Prostitute, "" },
         };
     }
 }

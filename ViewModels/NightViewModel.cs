@@ -27,7 +27,7 @@ namespace Mafia_panel.ViewModels
             _players = players;
             _discordClient = discordClient;
             _mode = mode;
-            ChangeTurn(PlayerRole.Curator);
+            ChangeTurn(PlayerRole.Godfather);
         }
         void ChangeTurn(PlayerRole role)
         {

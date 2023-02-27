@@ -75,13 +75,13 @@ namespace Mafia_panel.ViewModels
                 case PlayerRole.Chief:
                     IsAlternativeActionVisible = true;
                     break;
-                case PlayerRole.Resuscitator:
+                case PlayerRole.Doctor:
                     ActionName = "Defend";
                     break;
-                case PlayerRole.Anesthesiologist:
+                case PlayerRole.Prostitute:
                     ActionName = "Stun";
                     break;
-                case PlayerRole.Curator:
+                case PlayerRole.Godfather:
                     IsAlternativeActionVisible = _mode.IsCuratorCanCheck;
                     break;
             }

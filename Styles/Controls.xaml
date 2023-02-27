@@ -3,10 +3,11 @@
 
     <Style TargetType="{x:Type Control}" x:Key="BaseStyle">
         <Setter Property="FontSize" Value="15" />
+        <Setter Property="Foreground" Value="{StaticResource FlatUIGrayBrush}" />
     </Style>
 
     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource BaseStyle}">
-
+        <Setter Property="Background" Value="{StaticResource FlatUIBlackBrush}"/>
         <Setter Property="Padding" Value="5" />
         <Setter Property="Margin" Value="0 5 0 5" />
         <Setter Property="BorderThickness" Value="0" />
@@ -28,14 +29,14 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
-    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}">
 
-        <Setter Property="Background" Value="{StaticResource FlatUIRedBrush}" />
+    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}">
         <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{StaticResource FlatUIRedBrush}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="15 10" />
         <Setter Property="Margin" Value="0 10" />
+        <Setter Property="Cursor" Value="Hand"/>
 
         <Setter Property="Template">
             <Setter.Value>
@@ -61,11 +62,46 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}" x:Key="TextButton">
+
+        <Setter Property="Foreground" Value="DimGray" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ButtonBase}">
+                    <Border x:Name="border"
+                            CornerRadius="12.5"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="0"
+                            Background="Transparent" 
+                            SnapsToDevicePixels="True"
+                            >
+                        <TextBlock Text="{TemplateBinding Content}" 
+                                   Focusable="False" 
+                                   FontFamily="{TemplateBinding FontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                   Margin="{TemplateBinding Padding}" 
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type ListBox}" BasedOn="{StaticResource BaseStyle}">
 
         <Setter Property="Padding" Value="5" />
         <Setter Property="Margin" Value="0 5 0 5" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="{StaticResource FlatUIBlackBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource FlatUIBlackBrush}" />
+    </Style>
+    <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource BaseStyle}">
+        <Setter Property="Margin" Value="5" />
         <Setter Property="Background" Value="{StaticResource FlatUIBlackBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource FlatUIBlackBrush}" />
     </Style>

@@ -39,7 +39,7 @@ namespace Mafia_panel.ViewModels
         private RelayCommand _addVoteCommand;
         public RelayCommand AddVoteCommand
         {
-            get
+            get 
             {
                 return _addVoteCommand ??
                     (_addVoteCommand = new RelayCommand(obj =>

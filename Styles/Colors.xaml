@@ -7,5 +7,7 @@
     <SolidColorBrush x:Key="FlatUIBlackBrush" Color="{StaticResource FlatUIBlack}" />
     <Color x:Key="FlatUIRed">#E74C3C</Color>
     <SolidColorBrush x:Key="FlatUIRedBrush" Color="{StaticResource FlatUIRed}" />
+    <Color x:Key="FlatUIGray">#BDC3C7</Color>
+    <SolidColorBrush x:Key="FlatUIGrayBrush" Color="{StaticResource FlatUIGray}" />
     
 </ResourceDictionary>
