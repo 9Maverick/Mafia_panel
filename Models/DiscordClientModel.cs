@@ -8,25 +8,25 @@ using Discord.WebSocket;
 
 namespace Mafia_panel.Models
 {
-	interface IDiscordSend
+	interface IDiscordClientModel
 	{
 		void Send(string message, ulong id= 970726830887804978);
 		void SendToUserById(ulong id, string message);
 		void SendStart(string message, ObservableCollection<Player> Players);
 		void SendStatus(ObservableCollection<Player> Players, ulong id = 970726830887804978);
 		void ConfigurePlayers(ObservableCollection<Player> Players);
-		void SendInitialStatus(ObservableCollection<Player> Players, ModeModel mode, ulong id = 970726830887804978);
+		void SendInitialStatus(ObservableCollection<Player> Players, GameModeModel mode, ulong id = 970726830887804978);
 	}
 
 	/// <summary>
 	/// Plug class without connection to Discord API
 	/// </summary>
-	class HollowDiscord : IDiscordSend
+	class HollowDiscord : IDiscordClientModel
 	{
 		public void ConfigurePlayers(ObservableCollection<Player> Players){}
 		public void Send(string message, ulong id = 970726830887804978){}
 
-		public void SendInitialStatus(ObservableCollection<Player> Players, ModeModel mode, ulong id = 970726830887804978){}
+		public void SendInitialStatus(ObservableCollection<Player> Players, GameModeModel mode, ulong id = 970726830887804978){}
 
 		public void SendStart(string message, ObservableCollection<Player> Players){}
 
@@ -34,7 +34,7 @@ namespace Mafia_panel.Models
 
 		public void SendToUserById(ulong id, string message){}
 	}
-	class DiscordClientModel : IDiscordSend
+	class DiscordClientModel : IDiscordClientModel
 	{
 		#region Variables and Properties
 		/// <summary>
@@ -112,7 +112,7 @@ namespace Mafia_panel.Models
 		{
 			throw new NotImplementedException();
 		}
-		public void SendInitialStatus(ObservableCollection<Player> Players, ModeModel mode, ulong id = 970726830887804978)
+		public void SendInitialStatus(ObservableCollection<Player> Players, GameModeModel mode, ulong id = 970726830887804978)
 		{
 			Send("---------------------------------------\n" + "New game", id);
 			Send("Modificators: \n" +

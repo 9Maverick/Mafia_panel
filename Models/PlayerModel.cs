@@ -71,7 +71,7 @@ namespace Mafia_panel.Models
             get => _votes;
             set => SetProperty(ref _votes, value);
         }
-        public void TryKill(ModeModel mods)
+        public void TryKill(GameModeModel mods)
         {
             if (!(Status == PlayerStatus.Defended))
             {
@@ -85,7 +85,7 @@ namespace Mafia_panel.Models
             
         }
         public virtual void Kill() => Status = PlayerStatus.Killed;
-        public virtual void PlayerAction(Player target, ModeModel mods, ref bool no_error)
+        public virtual void PlayerAction(Player target, GameModeModel mods, ref bool no_error)
         {
             if(Status == PlayerStatus.Stunned0 || Status == PlayerStatus.Stunned1)
             {
@@ -93,7 +93,7 @@ namespace Mafia_panel.Models
                 return;
             }
         }
-        public virtual void PlayerAlternativeAction(Player target, ModeModel mods, ref bool no_error) => PlayerAction(target,mods,ref no_error);
+        public virtual void PlayerAlternativeAction(Player target, GameModeModel mods, ref bool no_error) => PlayerAction(target,mods,ref no_error);
 }
     class Chief : Player
     {
@@ -124,7 +124,7 @@ namespace Mafia_panel.Models
         /// <param name="target">Player to kill</param>
         /// <param name="mods">Game modificators</param>
         /// <param name="no_error">is function works right</param>
-        public override void PlayerAction(Player target, ModeModel mods, ref bool no_error)
+        public override void PlayerAction(Player target, GameModeModel mods, ref bool no_error)
         {
             base.PlayerAction(target, mods, ref no_error);
             if (!(mods.IsChiefLimitedKills && Kills == mods.ChiefLimitedKills) || !(mods.IsChiefCannotKillChecked && CheckedPlayers.Contains(target)))
@@ -147,7 +147,7 @@ namespace Mafia_panel.Models
         /// <param name="target">Player to check</param>
         /// <param name="mods">Game modificators</param>
         /// <param name="no_error">is function works right</param>
-        public override void PlayerAlternativeAction(Player target, ModeModel mods, ref bool no_error)
+        public override void PlayerAlternativeAction(Player target, GameModeModel mods, ref bool no_error)
         {
             base.PlayerAction(target, mods, ref no_error);
             if (!CheckedPlayers.Contains(target))
@@ -187,7 +187,7 @@ namespace Mafia_panel.Models
         /// <param name="target">Player to defend</param>
         /// <param name="mods">Game modificators</param>
         /// <param name="no_error">is function works right</param>
-        public override void PlayerAction(Player target, ModeModel mods, ref bool no_error)
+        public override void PlayerAction(Player target, GameModeModel mods, ref bool no_error)
         {
             base.PlayerAction(target, mods, ref no_error);
             if (!(this == target && SelfDefends > 0))
@@ -221,7 +221,7 @@ namespace Mafia_panel.Models
         /// <param name="target">Player to stun</param>
         /// <param name="mods">Game modificators</param>
         /// <param name="no_error">is function works right</param>
-        public override void PlayerAction(Player target, ModeModel mods, ref bool no_error)
+        public override void PlayerAction(Player target, GameModeModel mods, ref bool no_error)
         {
             base.PlayerAction(target, mods, ref no_error);
             if (target.Status == PlayerStatus.Defended || target.Status == PlayerStatus.Killed)
@@ -249,7 +249,7 @@ namespace Mafia_panel.Models
         /// <param name="target">Player to kill</param>
         /// <param name="mods">Game modificators</param>
         /// <param name="no_error">is function works right</param>
-        public override void PlayerAction(Player target, ModeModel mods, ref bool no_error)
+        public override void PlayerAction(Player target, GameModeModel mods, ref bool no_error)
         {
             base.PlayerAction(target, mods, ref no_error);
             target.TryKill(mods);
@@ -281,7 +281,7 @@ namespace Mafia_panel.Models
         /// <param name="target">Player to kill</param>
         /// <param name="mods">Game modificators</param>
         /// <param name="no_error">is function works right</param>
-        public override void PlayerAction(Player target, ModeModel mods, ref bool no_error)
+        public override void PlayerAction(Player target, GameModeModel mods, ref bool no_error)
         {
             base.PlayerAction(target, mods, ref no_error);
             target.TryKill(mods);
@@ -293,7 +293,7 @@ namespace Mafia_panel.Models
         /// <param name="target">Player to check</param>
         /// <param name="mods">Game modificators</param>
         /// <param name="no_error">is function works right</param>
-        public override void PlayerAlternativeAction(Player target, ModeModel mods, ref bool no_error)
+        public override void PlayerAlternativeAction(Player target, GameModeModel mods, ref bool no_error)
         {
             base.PlayerAction(target, mods, ref no_error);
             if (!(CheckedPlayers.Contains(target)) && mods.IsCuratorCanCheck)
@@ -316,6 +316,9 @@ namespace Mafia_panel.Models
             _curatorInherit.Invoke();
         }
     }
+    /// <summary>
+    /// Text about each role
+    /// </summary>
     public static class Templates
     {
         public static readonly Dictionary<PlayerRole, string> RoleTemplates = new Dictionary<PlayerRole, string>

@@ -2,7 +2,7 @@
 
 namespace Mafia_panel.Models
 {
-    class ModeModel : ViewModelBase
+    class GameModeModel : ViewModelBase
     {
         private bool _isDefenseStunning = false;
         public bool IsDefenseStunning

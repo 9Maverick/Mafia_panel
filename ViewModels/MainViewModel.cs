@@ -5,145 +5,131 @@ using System.Windows;
 using Mafia_panel.Core;
 using Mafia_panel.Models;
 
-namespace Mafia_panel.ViewModels
+namespace Mafia_panel.ViewModels;
+
+class MainViewModel : ViewModelBase
 {
-	class MainViewModel : ViewModelBase
+	IDiscordClientModel _discordClient;
+	PlayersViewModel _playersViewModel;
+	ObservableCollection<Player> Players => _playersViewModel.Players;
+	GameModeModel _mode;
+	ViewModelBase _currentViewModel;
+	public ViewModelBase CurrentViewModel
 	{
-		IDiscordSend _discordClient;
-		ObservableCollection<Player> _players;
-		ObservableCollection<Player> _playersBackup;
-		ModeModel _mode;
-		ViewModelBase _currentViewModel;
-		public ViewModelBase CurrentViewModel
-		{
-			get => _currentViewModel;
-			set => SetProperty(ref _currentViewModel, value);
-		}
+		get => _currentViewModel;
+		set => SetProperty(ref _currentViewModel, value);
+	}
 
-		Window _window;
+	Window _window;
 
-		public MainViewModel(Window window)
-		{
-			_discordClient = new HollowDiscord();//DiscordClientModel();
-			_players = new ObservableCollection<Player>();
-			_mode = new ModeModel();
-			CurrentViewModel = new InitialViewModel(_players, _mode, InitialSave, InitialConfigure);
-			_window = window;	
-		}
+	public MainViewModel(PlayersViewModel playersViewModel, GameModeModel mode, IDiscordClientModel discordClient, MainWindow window)
+	{
+		_playersViewModel = playersViewModel;
+		_discordClient = discordClient;
+		_mode = mode;
+		_window = window;
+		CurrentViewModel = new InitialViewModel(_playersViewModel, _mode, InitialSave, InitialConfigure);
+	}
 
-		void Inherit()
+	void Inherit()
+	{
+		var selectedPlayers = new List<int>();
+		var seed = new Random();
+		var random = new Random(seed.Next());
+		foreach (Player player in Players) if (player.Role == PlayerRole.Mafiozo) selectedPlayers.Add(Players.IndexOf(player));
+		if (selectedPlayers.Count == 0) return;
+		var curatorNum = selectedPlayers[random.Next(selectedPlayers.Count)];
+		Players[curatorNum] = new Curator(Players[curatorNum], Inherit);
+	}
+	void InitialSave()
+	{
+		_playersViewModel.SaveBackup();
+		_discordClient.SendInitialStatus(Players, _mode);
+		for (int i = 0; i < Players.Count; i++)
 		{
-			var selectedPlayers = new List<int>();
-			var seed = new Random();
-			var random = new Random(seed.Next());
-			foreach (Player player in _players) if (player.Role == PlayerRole.Mafiozo) selectedPlayers.Add(_players.IndexOf(player));
-			if (selectedPlayers.Count == 0) return;
-			var curatorNum = selectedPlayers[random.Next(selectedPlayers.Count)];
-			_players[curatorNum] = new Curator(_players[curatorNum], Inherit);
+			switch (Players[i].Role)
+			{
+				case PlayerRole.Godfather:
+					Players[i] = new Curator(Players[i], Inherit);
+					break;
+				case PlayerRole.Doctor:
+					Players[i] = new Resuscitator(Players[i]);
+					break;
+				case PlayerRole.Prostitute:
+					Players[i] = new Anesthesiologist(Players[i]);
+					break;
+				case PlayerRole.Chief:
+					Players[i] = new Chief(Players[i]);
+					break;
+				case PlayerRole.Psychopath:
+					Players[i] = new Psychopath(Players[i]);
+					break;
+			}
 		}
-		void InitialSave()
+		CurrentViewModel = new DayViewModel(DayEnd, _playersViewModel);
+	}
+	void InitialConfigure() => _discordClient.ConfigurePlayers(Players);
+	bool IsGameOver()
+	{
+		var badGuys = 0; var goodGuys = 0; var psycho = 0;
+		foreach (var player in Players)
 		{
-			_playersBackup = new ObservableCollection<Player>(_players);
-			_discordClient.SendInitialStatus(_players, _mode);
-			for (int i = 0; i < _players.Count; i++)
-			{
-				switch (_players[i].Role)
-				{
-					case PlayerRole.Godfather:
-						_players[i] = new Curator(_players[i], Inherit);
-						break;
-					case PlayerRole.Doctor:
-						_players[i] = new Resuscitator(_players[i]);
-						break;
-					case PlayerRole.Prostitute:
-						_players[i] = new Anesthesiologist(_players[i]);
-						break;
-					case PlayerRole.Chief:
-						_players[i] = new Chief(_players[i]);
-						break;
-					case PlayerRole.Psychopath:
-						_players[i] = new Psychopath(_players[i]);
-						break;
-				}
-			}
-			CurrentViewModel = new DayViewModel(DayEnd, _players);
+			if (player.Role == PlayerRole.Mafiozo || player.Role == PlayerRole.Godfather) badGuys++;
+			else if (player.Role == PlayerRole.Psychopath) psycho++;
+			else goodGuys++;
 		}
-		void InitialConfigure() => _discordClient.ConfigurePlayers(_players);
-		bool IsGameOver()
+		if (badGuys > goodGuys + psycho)
 		{
-			var badGuys = 0; var goodGuys = 0; var psycho = 0;
-			foreach (var player in _players)
-			{
-				if (player.Role == PlayerRole.Mafiozo || player.Role == PlayerRole.Godfather) badGuys++;
-				else if (player.Role == PlayerRole.Psychopath) psycho++;
-				else goodGuys++;
-			}
-			if (badGuys > goodGuys + psycho)
-			{
-				Win(true);
-				return true;
-			}
-			else if (badGuys + psycho == 0)
-			{
-				Win(false);
-				return true;
-			}
-			return false;
+			Win(true);
+			return true;
 		}
-		void Win(bool isMafiaWins)
+		else if (badGuys + psycho == 0)
 		{
-			if (isMafiaWins) _discordClient.Send("<@&977568272029478962> Game over, bad guys wins", 915884902401073152);
-			else _discordClient.Send("<@&977568272029478962> Game over, good guys wins", 915884902401073152);
-			_players = new ObservableCollection<Player>(_playersBackup);
-			_discordClient.SendStatus(_playersBackup, 915884902401073152);
-			CurrentViewModel = new InitialViewModel(_players, _mode, InitialSave, InitialConfigure);
+			Win(false);
+			return true;
 		}
-		void DayEnd()
-		{
-			_discordClient.SendStatus(_players);
-			var selectedPlayers = new List<int>();
-			foreach (var player in _players) if (player.Status == PlayerStatus.Killed) selectedPlayers.Add(_players.IndexOf(player));
-			foreach (var selectedPlayer in selectedPlayers) _players.Remove(_players[selectedPlayer]);
-			if (IsGameOver()) return;
-			foreach (var player in _players)
-			{
-				if (player.Status == PlayerStatus.Stunned0) player.Status = PlayerStatus.Stunned1;
-				else player.Status = PlayerStatus.None;
-				player.Votes = 0;
-			}
-			CurrentViewModel = new NightViewModel(NightEnd, _players, _discordClient, _mode);
-		}
-		void NightEnd()
-		{
-			_discordClient.SendStatus(_players);
-			var selectedPlayers = new List<int>();
-			foreach (var player in _players) if (player.Status == PlayerStatus.Killed) selectedPlayers.Add(_players.IndexOf(player));
-			foreach (var selectedPlayer in selectedPlayers) _players.Remove(_players[selectedPlayer]);
-			if (IsGameOver()) return;
-			foreach (var player in _players)
-			{
-				if (player.Status == PlayerStatus.Stunned0) player.Status = PlayerStatus.Stunned1;
-				else player.Status = PlayerStatus.None;
-			}
-			CurrentViewModel = new DayViewModel(DayEnd, _players);
-		}
+		return false;
+	}
+	void Win(bool isMafiaWins)
+	{
+		if (isMafiaWins) _discordClient.Send("<@&977568272029478962> Game over, bad guys wins", 915884902401073152);
+		else _discordClient.Send("<@&977568272029478962> Game over, good guys wins", 915884902401073152);
+		_playersViewModel.LoadBackup();
+		_discordClient.SendStatus(Players, 915884902401073152);
+		CurrentViewModel = new InitialViewModel(_playersViewModel, _mode, InitialSave, InitialConfigure);
+	}
+	void DayEnd()
+	{
+		_discordClient.SendStatus(Players);
+		_playersViewModel.ClearKilled();
+		if (IsGameOver()) return;
+		_playersViewModel.ClearStatus();
+		CurrentViewModel = new NightViewModel(NightEnd, _playersViewModel, _mode, _discordClient);
+	}
+	void NightEnd()
+	{
+		_discordClient.SendStatus(Players);
+		_playersViewModel.ClearKilled();
+		if (IsGameOver()) return;
+		_playersViewModel.ClearStatus();
+		CurrentViewModel = new DayViewModel(DayEnd, _playersViewModel);
+	}
 
-		private RelayCommand _minimizeCommand;
-		public RelayCommand MinimizeCommand
-		{
-			get => _minimizeCommand ?? (_minimizeCommand = new RelayCommand(obj =>	_window.WindowState= WindowState.Minimized));
-		}
+	private RelayCommand _minimizeCommand;
+	public RelayCommand MinimizeCommand
+	{
+		get => _minimizeCommand ?? (_minimizeCommand = new RelayCommand(obj =>	_window.WindowState= WindowState.Minimized));
+	}
 
-		private RelayCommand _maximizeCommand;
-		public RelayCommand MaximizeCommand
-		{
-			get => _maximizeCommand ?? (_maximizeCommand = new RelayCommand(obj => _window.WindowState ^= WindowState.Maximized));
-		}
+	private RelayCommand _maximizeCommand;
+	public RelayCommand MaximizeCommand
+	{
+		get => _maximizeCommand ?? (_maximizeCommand = new RelayCommand(obj => _window.WindowState ^= WindowState.Maximized));
+	}
 
-		private RelayCommand _closeCommand;
-		public RelayCommand CloseCommand
-		{
-			get => _closeCommand ?? (_closeCommand = new RelayCommand(obj => _window.Close()));
-		}
+	private RelayCommand _closeCommand;
+	public RelayCommand CloseCommand
+	{
+		get => _closeCommand ?? (_closeCommand = new RelayCommand(obj => _window.Close()));
 	}
 }
