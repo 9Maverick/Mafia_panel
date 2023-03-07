@@ -5,7 +5,17 @@ using System.Linq;
 
 namespace Mafia_panel.ViewModels;
 
-internal class PlayersViewModel : ViewModelBase
+public interface IPlayersViewModel
+{
+	ObservableCollection<Player> Players { get; set; }
+
+	void ClearKilled();
+	void ClearStatus();
+	void LoadBackup();
+	void SaveBackup();
+}
+
+public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 {
 	ObservableCollection<Player> _players;
 	public ObservableCollection<Player> Players
@@ -16,8 +26,8 @@ internal class PlayersViewModel : ViewModelBase
 	ObservableCollection<Player> _playersBackup;
 	public PlayersViewModel()
 	{
-		_players= new ObservableCollection<Player>();
-		_playersBackup= new ObservableCollection<Player>();
+		_players = new ObservableCollection<Player>();
+		_playersBackup = new ObservableCollection<Player>();
 	}
 	public void ClearKilled()
 	{

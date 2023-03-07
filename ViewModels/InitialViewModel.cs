@@ -3,15 +3,15 @@ using Mafia_panel.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows;
 
 namespace Mafia_panel.ViewModels;
 
 internal class InitialViewModel : ViewModelBase
 {
-	Action _initialSave;
-	Action _initialConfigure;
-	PlayersViewModel _playersViewModel;
+	IDiscordClientModel _discordClient;
+	IPlayersViewModel _playersViewModel;
+	MainViewModel _windowModel;
+
 	private Player _selectedPlayer;
 	public Player SelectedPlayer
 	{
@@ -20,8 +20,8 @@ internal class InitialViewModel : ViewModelBase
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 
-	GameModeModel _mode;
-	public GameModeModel Mode
+	IGameModeModel _mode;
+	public IGameModeModel Mode
 	{
 		get => _mode;
 		set => SetProperty(ref _mode, value);
@@ -33,13 +33,13 @@ internal class InitialViewModel : ViewModelBase
 		get => _isRolesGiven;
 		set => SetProperty(ref _isRolesGiven, value);
 	}
-	public InitialViewModel(PlayersViewModel playersViewModel, GameModeModel mod, Action initialSave, Action initialConfigure)
+
+	public InitialViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, MainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
-		_mode = mod;
-		_initialSave = initialSave;
-		_initialConfigure = initialConfigure;
-		foreach (var player in Players) player.Status = PlayerStatus.None;
+		_mode = mode;
+		_discordClient = discordClient;
+		_windowModel = windowModel;
 	}
 
 	private RelayCommand _addPlayerCommand;
@@ -84,9 +84,50 @@ internal class InitialViewModel : ViewModelBase
 					if (!(Players.Count < 15))  SetPlayerRole(PlayerRole.Psychopath);
 
 					IsRolesGiven = true;
-					_initialConfigure.Invoke(); 
+					_discordClient.ConfigurePlayers(Players);
 				}));
 		}
+	}
+	private RelayCommand _saveCommand;
+	public RelayCommand SaveCommand
+	{
+		get => _saveCommand ?? (_saveCommand = new RelayCommand(obj =>
+		{
+			_playersViewModel.SaveBackup();
+			_discordClient.SendInitialStatus(Players, _mode);
+			for (int i = 0; i < Players.Count; i++)
+			{
+				switch (Players[i].Role)
+				{
+					case PlayerRole.Godfather:
+						Players[i] = new Curator(Players[i], Inherit);
+						break;
+					case PlayerRole.Doctor:
+						Players[i] = new Resuscitator(Players[i]);
+						break;
+					case PlayerRole.Prostitute:
+						Players[i] = new Anesthesiologist(Players[i]);
+						break;
+					case PlayerRole.Chief:
+						Players[i] = new Chief(Players[i]);
+						break;
+					case PlayerRole.Psychopath:
+						Players[i] = new Psychopath(Players[i]);
+						break;
+				}
+			}
+			_windowModel.SwitchCurrentViewModelTo<DayViewModel>();
+		}));
+	}
+	void Inherit()
+	{
+		var selectedPlayers = new List<int>();
+		var seed = new Random();
+		var random = new Random(seed.Next());
+		foreach (Player player in Players) if (player.Role == PlayerRole.Mafiozo) selectedPlayers.Add(Players.IndexOf(player));
+		if (selectedPlayers.Count == 0) return;
+		var curatorNum = selectedPlayers[random.Next(selectedPlayers.Count)];
+		Players[curatorNum] = new Curator(Players[curatorNum], Inherit);
 	}
 	int GetRandomNumber(int max)
 	{
@@ -100,9 +141,5 @@ internal class InitialViewModel : ViewModelBase
 		var roleNum = selectedPlayers[GetRandomNumber(selectedPlayers.Count)];
 		Players[roleNum].Role = role;
 	}
-	private RelayCommand _saveCommand;
-	public RelayCommand SaveCommand
-	{
-		get => _saveCommand ?? (_saveCommand = new RelayCommand(obj =>_initialSave.Invoke()));
-	}
+	
 }

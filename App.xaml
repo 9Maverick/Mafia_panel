@@ -16,9 +16,6 @@
             <DataTemplate DataType="{x:Type viewModel:NightViewModel}">
                 <view:NightView/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModel:TurnViewModel}">
-                <view:TurnView/>
-            </DataTemplate>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/Colors.xaml" />
                 <ResourceDictionary Source="Styles/Controls.xaml" />
