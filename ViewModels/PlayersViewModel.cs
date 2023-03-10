@@ -1,5 +1,7 @@
 ﻿using Mafia_panel.Core;
 using Mafia_panel.Models;
+using System.Collections.Generic;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -31,12 +33,10 @@ public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 	}
 	public void ClearKilled()
 	{
-		foreach (var player in Players.ToList())
+		Players.Where(player => player.Status == PlayerStatus.Killed).ToList().All(Players.Remove);
+		if (Players.Where(player => player.Role == PlayerRole.Godfather).Count() == 0)
 		{
-			if (player.Status == PlayerStatus.Killed)
-			{
-				Players.Remove(player);
-			}
+			GodfatherInherit();
 		}
 	}
 	public void ClearStatus()
@@ -49,6 +49,16 @@ public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 			}
 			else player.Status = PlayerStatus.None;
 		}
+	}
+	void GodfatherInherit()
+	{
+		List<Player> selectedPlayers = new List<Player>(Players.Where(player => player.Role == PlayerRole.Mafiozo));
+
+		if (selectedPlayers.Count == 0) return;
+
+		var newGodfather = selectedPlayers[Random.Shared.Next(selectedPlayers.Count)];
+
+		Players[Players.IndexOf(newGodfather)] = new Godfather(newGodfather);
 	}
 	public void SaveBackup() => _playersBackup = new ObservableCollection<Player>(Players);
 	public void LoadBackup() => Players = new ObservableCollection<Player>(_playersBackup);

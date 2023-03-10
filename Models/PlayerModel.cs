@@ -28,7 +28,7 @@ public enum PlayerRole
 	Mafiozo,
 	Godfather,
 	Doctor,
-	Prostitute,
+	Anesthesiologist,
 	Chief,          
 	Psychopath
 }
@@ -70,6 +70,17 @@ public class Player : ViewModelBase
 		get => _votes;
 		set => SetProperty(ref _votes, value);
 	}
+
+	public Player(){}
+	public Player(Player player)
+	{
+		User = player.User;
+		Id = player.Id;
+		Name = player.Name;
+		Role = player.Role;
+		Status = player.Status;
+	}
+
 	public void TryKill(IGameModeModel mods)
 	{
 		if (!(Status == PlayerStatus.Defended))
@@ -84,15 +95,15 @@ public class Player : ViewModelBase
 		
 	}
 	public virtual void Kill() => Status = PlayerStatus.Killed;
-	public virtual void PlayerAction(Player target, IGameModeModel mods, ref bool no_error)
+	public virtual bool PlayerAction(Player target, IGameModeModel mods)
 	{
 		if(Status == PlayerStatus.Stunned0 || Status == PlayerStatus.Stunned1)
 		{
-			no_error = true;
-			return;
+			return false;
 		}
+		return true;
 	}
-	public virtual void PlayerAlternativeAction(Player target, IGameModeModel mods, ref bool no_error) => PlayerAction(target,mods,ref no_error);
+	public virtual bool PlayerAlternativeAction(Player target, IGameModeModel mods) => PlayerAction(target,mods);
 }
 class Chief : Player
 {
@@ -103,76 +114,54 @@ class Chief : Player
 		set => SetProperty(ref _kills, value);
 	}
 	private ObservableCollection<Player> _checkedPlayers;
-	public ObservableCollection<Player> CheckedPlayers
-	{
-		get => _checkedPlayers;
-		set => SetProperty(ref _checkedPlayers, value);
-	}
-	public Chief(Player player)
+	public ObservableCollection<Player> CheckedPlayers => _checkedPlayers;
+	public Chief(Player player) : base(player)
 	{
 		_checkedPlayers = new ObservableCollection<Player>();
-		User = player.User;
-		Id = player.Id;
-		Name = player.Name;
 		Role = PlayerRole.Chief;
-		Status = player.Status;
 	}
 	/// <summary>
 	/// Kills player
 	/// </summary>
 	/// <param name="target">Player to kill</param>
-	/// <param name="mods">Game modificators</param>
-	/// <param name="no_error">is function works right</param>
-	public override void PlayerAction(Player target, IGameModeModel mods, ref bool no_error)
+	/// <param name="mods">Game modifiers</param>
+	public override bool PlayerAction(Player target, IGameModeModel mods)
 	{
-		base.PlayerAction(target, mods, ref no_error);
-		if (!(mods.IsChiefLimitedKills && Kills == mods.ChiefLimitedKills) || !(mods.IsChiefCannotKillChecked && CheckedPlayers.Contains(target)))
+		bool canPerform = base.PlayerAction(target, mods);
+		if (!(mods.IsChiefLimitedKills && Kills == mods.ChiefLimitedKills) || !(mods.IsChiefCannotKillChecked && CheckedPlayers.Contains(target)) && canPerform)
 		{
 			target.TryKill(mods);
 			Kills++;
-			no_error = true;
-			return;
+			return canPerform;
 		}
-		else
-		{
-			MessageBox.Show("Cannot kill this target","Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			no_error = false;
-			return;
-		}
-	}
+
+		MessageBox.Show("Cannot kill this target", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+		return false;
+	} 
 	/// <summary>
 	/// Checks player
 	/// </summary>
 	/// <param name="target">Player to check</param>
-	/// <param name="mods">Game modificators</param>
-	/// <param name="no_error">is function works right</param>
-	public override void PlayerAlternativeAction(Player target, IGameModeModel mods, ref bool no_error)
+	/// <param name="mods">Game modifiers</param>
+	public override bool PlayerAlternativeAction(Player target, IGameModeModel mods)
 	{
-		base.PlayerAction(target, mods, ref no_error);
-		if (!CheckedPlayers.Contains(target))
+		bool canPerform =  base.PlayerAlternativeAction(target, mods);
+		if (!CheckedPlayers.Contains(target) && canPerform)
 		{
 			User.SendMessageAsync($"<@{target.Id}> is {target.Role}");
 			CheckedPlayers.Add(target);
-			no_error = true;
-			return;
+			return canPerform;
 		}
-		else
-		{
-			MessageBox.Show("Cannot check this target", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			no_error = false;
-			return;
-		}
+
+		MessageBox.Show("Cannot check this target", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+		return false;
 	}
 }
-class Resuscitator : Player
+class Doctor : Player
 {
-	public Resuscitator(Player player)
+	public Doctor(Player player) : base(player)
 	{
-		User = player.User;
-		Id = player.Id;
-		Name = player.Name;
 		Role = PlayerRole.Doctor;
-		Status = player.Status;
 	}
 	private int _selfDefends = 0;
 	public int SelfDefends
@@ -184,137 +173,110 @@ class Resuscitator : Player
 	/// Defends player
 	/// </summary>
 	/// <param name="target">Player to defend</param>
-	/// <param name="mods">Game modificators</param>
-	/// <param name="no_error">is function works right</param>
-	public override void PlayerAction(Player target, IGameModeModel mods, ref bool no_error)
+	/// <param name="mods">Game modifiers</param>
+	public override bool PlayerAction(Player target, IGameModeModel mods)
 	{
-		base.PlayerAction(target, mods, ref no_error);
-		if (!(this == target && SelfDefends > 0))
+		bool canPerform = base.PlayerAction(target, mods);
+		if (!(this == target && SelfDefends > 0) && canPerform)
 		{
 			target.Status = PlayerStatus.Defended;
 			if (this == target) SelfDefends++;
-			no_error = true;
-			return;
+			return canPerform;
 		}
-		else
-		{
-			MessageBox.Show("Cannot defend this target", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			no_error = false;
-			return;
-		}
+
+		MessageBox.Show("Cannot defend this target", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+		return false;
 	}
 }
 class Anesthesiologist : Player
 {
-	public Anesthesiologist(Player player)
+	public Anesthesiologist(Player player) : base(player) 
 	{
-		User = player.User;
-		Id = player.Id;
-		Name = player.Name;
-		Role = PlayerRole.Prostitute;
-		Status = player.Status;
+		Role = PlayerRole.Anesthesiologist;
 	}
 	/// <summary>
 	/// Stuns player
 	/// </summary>
 	/// <param name="target">Player to stun</param>
-	/// <param name="mods">Game modificators</param>
-	/// <param name="no_error">is function works right</param>
-	public override void PlayerAction(Player target, IGameModeModel mods, ref bool no_error)
+	/// <param name="mods">Game modifiers</param>
+	public override bool PlayerAction(Player target, IGameModeModel mods)
 	{
-		base.PlayerAction(target, mods, ref no_error);
-		if (target.Status == PlayerStatus.Defended || target.Status == PlayerStatus.Killed)
+		bool canPerform = base.PlayerAction(target, mods);
+		if (!(target.Status == PlayerStatus.Defended || target.Status == PlayerStatus.Killed) && canPerform)
 		{
-			no_error = true;
-			return;
+			target.Status = PlayerStatus.Stunned0;
 		}
-		target.Status = PlayerStatus.Stunned0;
-		no_error = true;
+		return canPerform;
 	}
 }
 class Psychopath : Player
 {
-	public Psychopath(Player player)
+	public Psychopath(Player player): base(player) 
 	{
-		User = player.User;
-		Id = player.Id;
-		Name = player.Name;
-		Role = PlayerRole.Psychopath;
-		Status = player.Status;
+		Role = PlayerRole.Psychopath; 
 	}
 	/// <summary>
 	/// Kills player
 	/// </summary>
 	/// <param name="target">Player to kill</param>
-	/// <param name="mods">Game modificators</param>
-	/// <param name="no_error">is function works right</param>
-	public override void PlayerAction(Player target, IGameModeModel mods, ref bool no_error)
+	/// <param name="mods">Game modifiers</param>
+	public override bool PlayerAction(Player target, IGameModeModel mods)
 	{
-		base.PlayerAction(target, mods, ref no_error);
-		target.TryKill(mods);
-		no_error = true;
+		bool canPerform = base.PlayerAction(target, mods);
+		if(canPerform)
+			target.TryKill(mods);
+		return canPerform;
 	}
 }
-class Curator : Player
+class Godfather : Player
 {
-	private Action _curatorInherit;
 	private ObservableCollection<Player> _checkedPlayers;
 	public ObservableCollection<Player> CheckedPlayers
 	{
 		get => _checkedPlayers;
 		set => SetProperty(ref _checkedPlayers, value);
 	}
-	public Curator(Player player, Action curatorInherit)
+	public Godfather(Player player) : base(player) 
 	{
-		_curatorInherit = curatorInherit;
 		_checkedPlayers = new ObservableCollection<Player>();
-		User = player.User;
-		Id = player.Id;
-		Name = player.Name;
 		Role = PlayerRole.Godfather;
-		Status = player.Status;
 	}
 	/// <summary>
 	/// Kills player
 	/// </summary>
 	/// <param name="target">Player to kill</param>
-	/// <param name="mods">Game modificators</param>
-	/// <param name="no_error">is function works right</param>
-	public override void PlayerAction(Player target, IGameModeModel mods, ref bool no_error)
+	/// <param name="mods">Game modifiers</param>
+	public override bool PlayerAction(Player target, IGameModeModel mods)
 	{
-		base.PlayerAction(target, mods, ref no_error);
-		target.TryKill(mods);
-		no_error= true;
+		bool canPerform = base.PlayerAction(target, mods);
+		if (canPerform)
+			target.TryKill(mods);
+		return canPerform;
 	}
 	/// <summary>
 	/// Checks player
 	/// </summary>
 	/// <param name="target">Player to check</param>
-	/// <param name="mods">Game modificators</param>
-	/// <param name="no_error">is function works right</param>
-	public override void PlayerAlternativeAction(Player target, IGameModeModel mods, ref bool no_error)
+	/// <param name="mods">Game modifiers</param>
+	public override bool PlayerAlternativeAction(Player target, IGameModeModel mods)
 	{
-		base.PlayerAction(target, mods, ref no_error);
-		if (!(CheckedPlayers.Contains(target)) && mods.IsCuratorCanCheck)
+		bool canPerform = base.PlayerAlternativeAction(target, mods);
+		if (!CheckedPlayers.Contains(target) && mods.IsCuratorCanCheck && canPerform)
 		{
 			User.SendMessageAsync($"<@{target.Id}> is {target.Role}");
 			CheckedPlayers.Add(target);
-			no_error = true;
-			return;
+			return canPerform;
 		}
-		else
-		{
-			MessageBox.Show("Cannot check this target", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			no_error = false;
-			return;
-		}
+
+		MessageBox.Show("Cannot check this target", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+		return false;
 	}
 	public override void Kill()
 	{
 		base.Kill();
-		_curatorInherit.Invoke();
 	}
 }
+
 /// <summary>
 /// Text about each role
 /// </summary>
@@ -327,6 +289,6 @@ public static class Templates
 		{ PlayerRole.Godfather,  "" },
 		{ PlayerRole.Mafiozo,  "" },
 		{ PlayerRole.Doctor, "" },
-		{ PlayerRole.Prostitute, "" },
+		{ PlayerRole.Anesthesiologist, "" },
 	};
 }

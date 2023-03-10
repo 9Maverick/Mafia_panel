@@ -79,7 +79,7 @@ internal class InitialViewModel : ViewModelBase
 
 					if (!(Players.Count < 9))   SetPlayerRole(PlayerRole.Chief);
 
-					if (!(Players.Count < 12))  SetPlayerRole(PlayerRole.Prostitute);
+					if (!(Players.Count < 12))  SetPlayerRole(PlayerRole.Anesthesiologist);
 
 					if (!(Players.Count < 15))  SetPlayerRole(PlayerRole.Psychopath);
 
@@ -100,12 +100,12 @@ internal class InitialViewModel : ViewModelBase
 				switch (Players[i].Role)
 				{
 					case PlayerRole.Godfather:
-						Players[i] = new Curator(Players[i], Inherit);
+						Players[i] = new Godfather(Players[i]);
 						break;
 					case PlayerRole.Doctor:
-						Players[i] = new Resuscitator(Players[i]);
+						Players[i] = new Doctor(Players[i]);
 						break;
-					case PlayerRole.Prostitute:
+					case PlayerRole.Anesthesiologist:
 						Players[i] = new Anesthesiologist(Players[i]);
 						break;
 					case PlayerRole.Chief:
@@ -118,16 +118,6 @@ internal class InitialViewModel : ViewModelBase
 			}
 			_windowModel.SwitchCurrentViewModelTo<DayViewModel>();
 		}));
-	}
-	void Inherit()
-	{
-		var selectedPlayers = new List<int>();
-		var seed = new Random();
-		var random = new Random(seed.Next());
-		foreach (Player player in Players) if (player.Role == PlayerRole.Mafiozo) selectedPlayers.Add(Players.IndexOf(player));
-		if (selectedPlayers.Count == 0) return;
-		var curatorNum = selectedPlayers[random.Next(selectedPlayers.Count)];
-		Players[curatorNum] = new Curator(Players[curatorNum], Inherit);
 	}
 	int GetRandomNumber(int max)
 	{

@@ -73,7 +73,7 @@ class NightViewModel : ViewModelBase
 			case PlayerRole.Doctor:
 				ActionName = "Defend";
 				break;
-			case PlayerRole.Prostitute:
+			case PlayerRole.Anesthesiologist:
 				ActionName = "Stun";
 				break;
 			case PlayerRole.Godfather:
@@ -90,7 +90,7 @@ class NightViewModel : ViewModelBase
 	{
 		if ((int)role == 8)
 		{
-			ChangeTurn(PlayerRole.Godfather); 
+			ChangeTurn(PlayerRole.Godfather);
 			NightEnd();
 			return;
 		}
@@ -129,9 +129,8 @@ class NightViewModel : ViewModelBase
 							"Next Turn",
 							MessageBoxButton.YesNo,
 							MessageBoxImage.Question) == MessageBoxResult.No) return;
-					bool no_trouble = false;
-					ActorPlayer.PlayerAction(TargetPlayer, _mode, ref no_trouble);
-					if (!no_trouble) return;
+					bool canPerform = ActorPlayer.PlayerAction(TargetPlayer, _mode);
+					if (!canPerform) return;
 					ChangeTurn(ActorPlayerRole + 1);
 				}));
 		}
@@ -149,9 +148,8 @@ class NightViewModel : ViewModelBase
 							"Next Turn",
 							MessageBoxButton.YesNo,
 							MessageBoxImage.Question) == MessageBoxResult.No) return;
-					bool no_trouble = false;
-					ActorPlayer.PlayerAlternativeAction(TargetPlayer, _mode, ref no_trouble);
-					if (!no_trouble) return;
+					bool canPerform = ActorPlayer.PlayerAlternativeAction(TargetPlayer, _mode);
+					if (!canPerform) return;
 					ChangeTurn(ActorPlayerRole + 1);
 				}));
 		}

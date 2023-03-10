@@ -66,8 +66,10 @@ internal class DayViewModel : ViewModelBase
 						if (player.Votes > maxvotes)
 						{
 							maxvotes = player.Votes;
-							votedPlayers = new List<int>();
-							votedPlayers.Add(Players.IndexOf(player));
+							votedPlayers = new List<int>
+							{
+								Players.IndexOf(player)
+							};
 						}
 						else if (player.Votes == maxvotes)
 						{
@@ -89,13 +91,16 @@ internal class DayViewModel : ViewModelBase
 							MessageBoxButton.YesNo,
 							MessageBoxImage.Question) == MessageBoxResult.No) return;
 					if(votedPlayers.Count == 1) Players[votedPlayers[0]].Kill();
-
-					_discordClient.SendStatus(Players);
-					_playersViewModel.ClearKilled();
-					if (_windowModel.IsGameOver()) return;
-					_playersViewModel.ClearStatus();
-					_windowModel.SwitchCurrentViewModelTo<NightViewModel>();
+					DayEnd();
 				}));
 		}
+	}
+	void DayEnd()
+	{
+		_discordClient.SendStatus(Players);
+		_playersViewModel.ClearKilled();
+		if (_windowModel.IsGameOver()) return;
+		_playersViewModel.ClearStatus();
+		_windowModel.SwitchCurrentViewModelTo<NightViewModel>();
 	}
 }
