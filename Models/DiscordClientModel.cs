@@ -15,7 +15,7 @@ public interface IDiscordClientModel
 	public void SendStart(string message, ObservableCollection<Player> Players);
 	public void SendStatus(ObservableCollection<Player> Players, ulong id = 970726830887804978);
 	public void ConfigurePlayers(ObservableCollection<Player> Players);
-	public void SendInitialStatus(ObservableCollection<Player> Players, IGameModeModel mode, ulong id = 970726830887804978);
+	public void SendInitialStatus(ObservableCollection<Player> Players, IGameModeModel mode, ulong id = 970726830887804978); 
 }
 
 /// <summary>

@@ -68,6 +68,7 @@ class NightViewModel : ViewModelBase
 		switch (ActorPlayerRole)
 		{
 			case PlayerRole.Chief:
+				ActionName = "Kill";
 				IsAlternativeActionVisible = true;
 				break;
 			case PlayerRole.Doctor:
@@ -77,6 +78,7 @@ class NightViewModel : ViewModelBase
 				ActionName = "Stun";
 				break;
 			case PlayerRole.Godfather:
+				ActionName = "Kill";
 				IsAlternativeActionVisible = _mode.IsCuratorCanCheck;
 				break;
 		}

@@ -33,7 +33,9 @@ public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 	}
 	public void ClearKilled()
 	{
-		Players.Where(player => player.Status == PlayerStatus.Killed).ToList().All(Players.Remove);
+		Players.Where(player => player.Status == PlayerStatus.Killed)
+			.ToList()
+			.All(Players.Remove);
 		if (Players.Where(player => player.Role == PlayerRole.Godfather).Count() == 0)
 		{
 			GodfatherInherit();
