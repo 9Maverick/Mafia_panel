@@ -91,6 +91,7 @@ internal class DayViewModel : ViewModelBase
 							MessageBoxButton.YesNo,
 							MessageBoxImage.Question) == MessageBoxResult.No) return;
 					if(votedPlayers.Count == 1) Players[votedPlayers[0]].Kill();
+					IsSecondTour = false;
 					DayEnd();
 				}));
 		}
