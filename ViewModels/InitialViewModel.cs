@@ -93,6 +93,8 @@ internal class InitialViewModel : ViewModelBase
 	{
 		get => _saveCommand ?? (_saveCommand = new RelayCommand(obj =>
 		{
+			if (_windowModel.TryContinue()) return;
+
 			_playersViewModel.SaveBackup();
 			_discordClient.SendInitialStatus(Players, _mode);
 			for (int i = 0; i < Players.Count; i++)

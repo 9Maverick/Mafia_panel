@@ -55,6 +55,6 @@
         <Button Grid.Row="1" 
                 Command="{Binding SaveCommand}" 
                 Margin="0 5"
-                IsEnabled="{Binding IsRolesGiven}">Save</Button>
+                IsEnabled="{Binding IsRolesGiven}">Save settings</Button>
     </Grid>
 </UserControl>

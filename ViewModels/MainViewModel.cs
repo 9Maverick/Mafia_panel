@@ -11,6 +11,7 @@ public class MainViewModel : ViewModelBase
 	IDiscordClientModel _discordClient;
 	IPlayersViewModel _playersViewModel;
 	ObservableCollection<Player> Players => _playersViewModel.Players;
+	ViewModelBase _savedViewModel;
 	ViewModelBase _currentViewModel;
 	public ViewModelBase CurrentViewModel
 	{
@@ -55,6 +56,7 @@ public class MainViewModel : ViewModelBase
 		else _discordClient.Send("<@&977568272029478962> Game over, good guys wins", 915884902401073152);
 		_playersViewModel.LoadBackup();
 		_discordClient.SendStatus(Players, 915884902401073152);
+		_savedViewModel = null;
 		SwitchCurrentViewModelTo<InitialViewModel>();
 	}
 	public void NightEnd()
@@ -65,6 +67,17 @@ public class MainViewModel : ViewModelBase
 		_playersViewModel.ClearStatus();
 		SwitchCurrentViewModelTo<DayViewModel>();
 	}
+	void ShowMenu()
+	{
+		_savedViewModel = CurrentViewModel;
+		SwitchCurrentViewModelTo<InitialViewModel>();
+	}
+	public bool TryContinue() 
+	{ 
+		if(_savedViewModel == null) return false;
+		CurrentViewModel = _savedViewModel;
+		return true;
+	} 
 
 	private RelayCommand _minimizeCommand;
 	public RelayCommand MinimizeCommand
@@ -82,5 +95,10 @@ public class MainViewModel : ViewModelBase
 	public RelayCommand CloseCommand
 	{
 		get => _closeCommand ?? (_closeCommand = new RelayCommand(obj => Window.Close()));
+	}
+	private RelayCommand _menuCommand;
+	public RelayCommand MenuCommand
+	{
+		get => _menuCommand ?? (_menuCommand = new RelayCommand(obj => ShowMenu()));
 	}
 }

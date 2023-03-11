@@ -21,7 +21,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Window}">
                         <Grid>
-                            <!-- Corners -->
+                            <!--Window Corners -->
                             <Border x:Name="Container"
                                         Background="{StaticResource FlatUIDarkBrush}"
                                         CornerRadius="10" />
@@ -43,9 +43,12 @@
                                     </Grid.ColumnDefinitions>
                                     
                                     <!--Window icon-->
-                                    <Image Height="40" Width="40" Source="Source/Images/Mafia.png" />
-
-
+                                    <Button Panel.ZIndex="2" 
+                                            Style="{StaticResource ContentButton}" 
+                                            Command="{Binding MenuCommand}"
+                                            WindowChrome.IsHitTestVisibleInChrome="True"> 
+                                        <Image Height="40" Width="40" Source="Source/Images/Mafia.png" />
+                                    </Button>
 
                                     <!-- Window controls-->
                                     <StackPanel Grid.Column="2" Orientation="Horizontal">
@@ -62,6 +65,7 @@
 
                                 </Grid>
 
+                                <!-- Window content -->
                                 <Grid Grid.Row="1" ClipToBounds="True">
                                     <ContentPresenter Content="{TemplateBinding Content}" />
                                 </Grid>
