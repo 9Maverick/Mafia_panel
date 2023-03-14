@@ -8,10 +8,15 @@ namespace Mafia_panel.ViewModels;
 
 internal class InitialViewModel : ViewModelBase
 {
-	IDiscordClientModel _discordClient;
 	IPlayersViewModel _playersViewModel;
-	MainViewModel _windowModel;
+	IMainViewModel _windowModel;
 
+	IDiscordClientModel _discordClient;
+	public IDiscordClientModel DiscordClientModel
+	{
+		get => _discordClient;
+		set => SetProperty(ref _discordClient, value);
+	}
 	private Player _selectedPlayer;
 	public Player SelectedPlayer
 	{
@@ -26,15 +31,20 @@ internal class InitialViewModel : ViewModelBase
 		get => _mode;
 		set => SetProperty(ref _mode, value);
 	}
-
 	private bool _isRolesGiven = false;
 	public bool IsRolesGiven
 	{
 		get => _isRolesGiven;
 		set => SetProperty(ref _isRolesGiven, value);
 	}
+	private bool _isDiscordOn = false;
+	public bool IsDiscordOn
+	{
+		get => _isDiscordOn;
+		set => SetProperty(ref _isDiscordOn, value);
+	}
 
-	public InitialViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, MainViewModel windowModel)
+	public InitialViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;
@@ -84,7 +94,6 @@ internal class InitialViewModel : ViewModelBase
 					if (!(Players.Count < 15))  SetPlayerRole(PlayerRole.Psychopath);
 
 					IsRolesGiven = true;
-					_discordClient.ConfigurePlayers(Players);
 				}));
 		}
 	}

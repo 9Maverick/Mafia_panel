@@ -18,8 +18,8 @@ public partial class App : Application
 			{
 				services.AddSingleton<IPlayersViewModel, PlayersViewModel>(); 
 				services.AddSingleton<IGameModeModel, GameModeModel>();
-				services.AddSingleton<IDiscordClientModel, HollowDiscord>();
-				services.AddSingleton<MainViewModel>();
+				services.AddSingleton<IDiscordClientModel, DiscordClientModel>();
+				services.AddSingleton<IMainViewModel, MainViewModel>();
 				services.AddSingleton<MainWindow>();
 				services.AddSingleton<InitialViewModel>();
 				services.AddSingleton<DayViewModel>();

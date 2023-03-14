@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using Mafia_panel.Core;
 using System;
 using System.Collections.Generic;
@@ -34,9 +35,20 @@ public enum PlayerRole
 }
 public class Player : ViewModelBase
 {
-	public IUser User;
-	private ulong _id;
-	public ulong Id 
+	private SocketGuildUser _user;
+	public SocketGuildUser User
+	{
+		get => _user;
+		set
+		{
+			SetProperty(ref _user, value);
+			if (User == null) return;
+			Name = User.Nickname ?? User.Username;
+			Id = User.Id;
+		}
+	}
+	private ulong _id; 
+	public ulong Id  
 	{
 		get => _id;
 		set => SetProperty(ref _id, value); 
@@ -74,7 +86,7 @@ public class Player : ViewModelBase
 	public Player(){}
 	public Player(Player player)
 	{
-		User = player.User;
+		User = player.User ?? null;
 		Id = player.Id;
 		Name = player.Name;
 		Role = player.Role;
@@ -261,7 +273,7 @@ class Godfather : Player
 	public override bool PlayerAlternativeAction(Player target, IGameModeModel mods)
 	{
 		bool canPerform = base.PlayerAlternativeAction(target, mods);
-		if (!CheckedPlayers.Contains(target) && mods.IsCuratorCanCheck && canPerform)
+		if (!CheckedPlayers.Contains(target) && mods.IsGodfatherCanCheck && canPerform)
 		{
 			User.SendMessageAsync($"<@{target.Id}> is {target.Role}");
 			CheckedPlayers.Add(target);

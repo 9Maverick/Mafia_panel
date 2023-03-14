@@ -12,7 +12,7 @@ internal class DayViewModel : ViewModelBase
 {
 	IPlayersViewModel _playersViewModel;
 	IDiscordClientModel _discordClient;
-	MainViewModel _windowModel;
+	IMainViewModel _windowModel;
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 	Player _selectedPlayer;
 	public Player SelectedPlayer
@@ -27,7 +27,7 @@ internal class DayViewModel : ViewModelBase
 		set => SetProperty(ref _isSecondTour, value);
 	}
 
-	public DayViewModel(IPlayersViewModel playersViewModel, IDiscordClientModel discordClient, MainViewModel windowModel)
+	public DayViewModel(IPlayersViewModel playersViewModel, IDiscordClientModel discordClient, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_discordClient = discordClient;
@@ -92,16 +92,8 @@ internal class DayViewModel : ViewModelBase
 							MessageBoxImage.Question) == MessageBoxResult.No) return;
 					if(votedPlayers.Count == 1) Players[votedPlayers[0]].Kill();
 					IsSecondTour = false;
-					DayEnd();
+					_windowModel.NextPhase<NightViewModel>();
 				}));
 		}
-	}
-	void DayEnd()
-	{
-		_discordClient.SendStatus(Players);
-		_playersViewModel.ClearKilled();
-		if (_windowModel.IsGameOver()) return;
-		_playersViewModel.ClearStatus();
-		_windowModel.SwitchCurrentViewModelTo<NightViewModel>();
 	}
 }

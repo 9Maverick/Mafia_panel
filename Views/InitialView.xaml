@@ -23,14 +23,41 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <ListBox Grid.Row="0" ItemsSource="{Binding Players}" SelectedItem="{Binding SelectedPlayer}" >
+                <ListBox Grid.Row="0" ItemsSource="{Binding Players}" SelectedItem="{Binding SelectedPlayer}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="5">
-                                <TextBlock FontSize="18" Text="{Binding Path=Name}" />
-                                <TextBox Text="{Binding Path=Id}" />
-                                <TextBlock Text="{Binding Path=Role}" />
-                            </StackPanel>
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                           Margin="5"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           Text="User:"/>
+                                <TextBox Grid.Row="0" Grid.Column="1"
+                                         Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                         Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ItemsControl}, 
+                                                      Path=DataContext.IsDiscordOn, Converter={StaticResource InvertBoolToVis}}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1" Margin="0,5,0,5"
+                                          ItemsSource="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ItemsControl}, 
+                                                        Path=DataContext.DiscordClientModel.GuildUsers}"
+                                          SelectedItem="{Binding Path=User, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                          IsEditable="True"
+                                          Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ItemsControl}, 
+                                                       Path=DataContext.IsDiscordOn, Converter={StaticResource BoolToVis}}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           Text="Role:"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1"
+                                           Text="{Binding Path=Role}" />
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -45,11 +72,67 @@
                 <Button Grid.Row="2" Command="{Binding AddRolesCommand}" Margin="0 5">Give roles</Button>
             </Grid>
             <StackPanel Grid.Column="1" Margin="5 0 0 0">
-                <CheckBox Content="Is Defense Stunning" IsChecked="{Binding Mode.IsDefenseStunning}"/>
-                <CheckBox Content="Is Curator Can Check" IsChecked="{Binding Mode.IsCuratorCanCheck}"/>
-                <CheckBox Content="Is Chief Cannot Kill Checked" IsChecked="{Binding Mode.IsChiefCannotKillChecked}"/>
-                <CheckBox Content="Is Chief Limited Kills" IsChecked="{Binding Mode.IsChiefLimitedKills}"/>
-                <TextBox Text="{Binding Mode.ChiefLimitedKills}" Visibility="{Binding Mode.IsChiefLimitedKills, Converter={StaticResource BoolToVis}}"/>
+                <CheckBox Content="Is Defense Stunning" IsChecked="{Binding Mode.IsDefenseStunning, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Content="Is Godfather Can Check" IsChecked="{Binding Mode.IsCuratorCanCheck, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Content="Is Chief Cannot Kill Checked" IsChecked="{Binding Mode.IsChiefCannotKillChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Content="Is Chief Limited Kills" IsChecked="{Binding Mode.IsChiefLimitedKills, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Text="{Binding Mode.ChiefLimitedKills, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Mode.IsChiefLimitedKills, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Margin="5 0 0 0">
+                <CheckBox Grid.Row="0" Content="Discord" IsChecked="{Binding IsDiscordOn}"/>
+                <Grid Visibility="{Binding IsDiscordOn, Converter={StaticResource BoolToVis}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Margin="5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Text="Token:"/>
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                         Text="{Binding DiscordClientModel.Token, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Margin="5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Text="Server:"/>
+                    <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,5,0,0"
+                              ItemsSource="{Binding DiscordClientModel.Guilds}"
+                              SelectedItem="{Binding DiscordClientModel.Guild, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0"
+                               Margin="5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Text="Game master:"/>
+                    <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,5,0,0"
+                              ItemsSource="{Binding DiscordClientModel.GuildUsers}"
+                              SelectedItem="{Binding DiscordClientModel.GameMaster, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0"
+                               Margin="5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Text="Log channel:"/>
+                    <ComboBox Grid.Row="3" Grid.Column="1" Margin="0,5,0,0"
+                              ItemsSource="{Binding DiscordClientModel.GuildChannels}"
+                              SelectedItem="{Binding DiscordClientModel.LogChannel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0"
+                               Margin="5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Text="Announcment:"/>
+                    <ComboBox Grid.Row="4" Grid.Column="1" Margin="0,5,0,0"
+                              ItemsSource="{Binding DiscordClientModel.GuildChannels}"
+                              SelectedItem="{Binding DiscordClientModel.AnnouncementChannel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True"/>
+                </Grid>
             </StackPanel>
         </Grid>
         <Button Grid.Row="1" 

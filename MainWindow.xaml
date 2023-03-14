@@ -12,7 +12,7 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
-        Background="{StaticResource FlatUIDarkBrush}">
+        Background="{StaticResource FlatUIDarkerBrush}">
 
     <Window.Resources>
         <Style TargetType="{x:Type local:MainWindow}">
@@ -23,7 +23,7 @@
                         <Grid>
                             <!--Window Corners -->
                             <Border x:Name="Container"
-                                        Background="{StaticResource FlatUIDarkBrush}"
+                                        Background="{StaticResource FlatUIDarkerBrush}"
                                         CornerRadius="10" />
                             <Grid  Margin="10">
                                 <Grid.OpacityMask>

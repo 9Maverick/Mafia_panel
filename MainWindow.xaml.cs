@@ -5,10 +5,10 @@ namespace Mafia_panel;
 
 public partial class MainWindow : Window
 {
-	public MainWindow(MainViewModel mainViewModel)
+	public MainWindow(IMainViewModel mainViewModel)
 	{
 		DataContext = mainViewModel;
-		mainViewModel.Window= this;
+		mainViewModel.MainWindow = this;
 		mainViewModel.SwitchCurrentViewModelTo<InitialViewModel>();
 		InitializeComponent();
 	}

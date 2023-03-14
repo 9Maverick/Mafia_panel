@@ -2,7 +2,7 @@
 using Mafia_panel.Core;
 using System.Windows;
 using System.Collections.ObjectModel;
-
+using Discord;
 
 namespace Mafia_panel.ViewModels;
 
@@ -11,7 +11,7 @@ class NightViewModel : ViewModelBase
 	IPlayersViewModel _playersViewModel;
 	IGameModeModel _mode;
 	IDiscordClientModel _discordClient;
-	MainViewModel _windowModel;
+	IMainViewModel _windowModel;
 
 	Player _actorPlayer;
 	public Player ActorPlayer
@@ -51,13 +51,12 @@ class NightViewModel : ViewModelBase
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 
-	public NightViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, MainViewModel windowModel)
+	public NightViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;
 		_discordClient = discordClient;
 		_windowModel = windowModel;
-		ChangeTurn(PlayerRole.Godfather);
 	}
 	void InitializeTurn()
 	{
@@ -79,21 +78,20 @@ class NightViewModel : ViewModelBase
 				break;
 			case PlayerRole.Godfather:
 				ActionName = "Kill";
-				IsAlternativeActionVisible = _mode.IsCuratorCanCheck;
+				IsAlternativeActionVisible = _mode.IsGodfatherCanCheck;
 				break;
 		}
 
 		TargetPlayer = Players[0];
 		string message = "";
 		for (int i = 0; i < Players.Count; i++) message += $"{i + 1}. {Players[i].Name}" + "\n";
-		_discordClient.SendToUserById(ActorPlayer.Id, "Your Turn, choose target by \"!target <number of target>\" Example:\n!target 3\n" + "Targets:\n" + message);
+		ActorPlayer.User.SendMessageAsync("Your Turn, choose target by \"!target <number of target>\" Example:\n!target 3\n" + "Targets:\n" + message);
 	}
-	void ChangeTurn(PlayerRole role)
+	public void ChangeTurn(PlayerRole role)
 	{
 		if ((int)role == 8)
 		{
-			ChangeTurn(PlayerRole.Godfather);
-			NightEnd();
+			_windowModel.NextPhase<DayViewModel>();
 			return;
 		}
 		var playerCanAct = false;
@@ -102,22 +100,14 @@ class NightViewModel : ViewModelBase
 				playerCanAct = true;
 		if(playerCanAct)
 		{
-			_discordClient.Send($"{role}s Turn");
+			_discordClient.SendToLogChannel($"{role}s Turn");
 			ActorPlayerRole = role;
 			InitializeTurn();
 			return;
 		}
 		ChangeTurn(role + 1);
 	}
-	void NightEnd()
-	{
-		_discordClient.SendStatus(_playersViewModel.Players);
-		_playersViewModel.ClearKilled();
-		if (_windowModel.IsGameOver()) return;
-		_playersViewModel.ClearStatus();
-		_windowModel.SwitchCurrentViewModelTo<DayViewModel>();
-	}
-
+	 
 	private RelayCommand _actionCommand;
 	public RelayCommand ActionCommand
 	{

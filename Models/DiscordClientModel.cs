@@ -1,80 +1,133 @@
-﻿using System;
+﻿using Discord;
+using Discord.WebSocket;
+using Mafia_panel.Core;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
 
 namespace Mafia_panel.Models;
 
 public interface IDiscordClientModel
 {
-	public void Send(string message, ulong id= 970726830887804978);
-	public void SendToUserById(ulong id, string message);
-	public void SendStart(string message, ObservableCollection<Player> Players);
-	public void SendStatus(ObservableCollection<Player> Players, ulong id = 970726830887804978);
-	public void ConfigurePlayers(ObservableCollection<Player> Players);
+	SocketTextChannel AnnouncementChannel { get; set; }
+	SocketGuildUser GameMaster { get; set; }
+	SocketGuild Guild { get; set; }
+	ObservableCollection<SocketTextChannel> GuildChannels { get; set; }
+	ObservableCollection<SocketGuild> Guilds { get; set; }
+	ObservableCollection<SocketGuildUser> GuildUsers { get; set; }
+	SocketTextChannel LogChannel { get; set; }
+	string Token { get; set; }
+	public Task SendToLogChannel(string message);
+	public Task SendToAnnounceChannel(string message);
+	public void SendStatus(ObservableCollection<Player> Players);
 	public void SendInitialStatus(ObservableCollection<Player> Players, IGameModeModel mode, ulong id = 970726830887804978); 
 }
 
-/// <summary>
-/// Plug class without connection to Discord API
-/// </summary>
-public class HollowDiscord : IDiscordClientModel
+///// <summary>
+///// Plug class without connection to Discord API
+///// </summary>
+//public class HollowDiscord : IDiscordClientModel
+//{
+//	public SocketTextChannel AnnouncementChannel { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+//	public SocketGuildUser GameMaster { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+//	public SocketGuild Guild { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+//	public ObservableCollection<SocketTextChannel> GuildChannels { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+//	public ObservableCollection<SocketGuild> Guilds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+//	public ObservableCollection<SocketGuildUser> GuildUsers { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+//	public SocketTextChannel LogChannel { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+//	public string Token { get; set; }
+//	public void SendToLogChannel(string message){}
+
+//	public void SendInitialStatus(ObservableCollection<Player> Players, IGameModeModel mode, ulong id = 970726830887804978){}
+
+//	public void SendToAnnounceChannel(string message){}
+
+//	public void SendStatus(ObservableCollection<Player> Players){}
+//}
+
+class DiscordClientModel : ViewModelBase, IDiscordClientModel
 {
-	public void ConfigurePlayers(ObservableCollection<Player> Players){}
-	public void Send(string message, ulong id = 970726830887804978){}
-
-	public void SendInitialStatus(ObservableCollection<Player> Players, IGameModeModel mode, ulong id = 970726830887804978){}
-
-	public void SendStart(string message, ObservableCollection<Player> Players){}
-
-	public void SendStatus(ObservableCollection<Player> Players, ulong id = 970726830887804978){}
-
-	public void SendToUserById(ulong id, string message){}
-}
-class DiscordClientModel : IDiscordClientModel
-{
-	#region Variables and Properties
-	/// <summary>
-	/// Client of discord bot
-	/// </summary>
 	DiscordSocketClient client;
 
 	/// <summary>
 	/// Token of bot to login
 	/// </summary>
-	string token = "";
-
-	SocketGuild _guild;
-
-	#endregion
-
-	#region Functions
-	/// <summary>
-	/// Constructor, witch creating client
-	/// </summary>
-	public DiscordClientModel()
+	string _token;
+	public string Token
 	{
-		StartClient();
+		get => _token;
+		set
+		{
+			SetProperty(ref _token, value);
+			StartClient();
+		}
 	}
-	async void StartClient()
+	SocketGuild _guild;
+	public SocketGuild Guild
+	{
+		get => _guild;
+		set
+		{
+			SetProperty(ref _guild, value);
+			GetGuildData();
+		}
+	}
+	SocketGuildUser _gameMaster;
+	public SocketGuildUser GameMaster
+	{
+		get => _gameMaster;
+		set => SetProperty(ref _gameMaster, value);
+	}
+	SocketTextChannel _logChannel;
+	public SocketTextChannel LogChannel
+	{
+		get => _logChannel;
+		set => SetProperty(ref _logChannel, value);
+	}
+	SocketTextChannel _announcementChannel;
+	public SocketTextChannel AnnouncementChannel
+	{
+		get => _announcementChannel;
+		set => SetProperty(ref _announcementChannel, value);
+	}
+	ObservableCollection<SocketGuild> _guilds; 
+	public ObservableCollection<SocketGuild> Guilds
+	{
+		get => _guilds;
+		set => SetProperty(ref _guilds, value);
+	}
+	ObservableCollection<SocketGuildUser> _guildUsers;
+	public ObservableCollection<SocketGuildUser> GuildUsers
+	{
+		get => _guildUsers;
+		set => SetProperty(ref _guildUsers, value);
+	}
+	ObservableCollection<SocketTextChannel> _guildChannels;
+	public ObservableCollection<SocketTextChannel> GuildChannels
+	{
+		get => _guildChannels;
+		set => SetProperty(ref _guildChannels, value);
+	}
+
+	public void StartClient()
 	{
 		try
 		{
 			client = new DiscordSocketClient(new DiscordSocketConfig()
 			{
-			GatewayIntents = GatewayIntents.All,
-			AlwaysDownloadUsers = true
+				GatewayIntents = GatewayIntents.All,
+				AlwaysDownloadUsers = true
 			});
 
 			client.MessageReceived += CommandsHandler;
 			client.Log += Log;
-			client.Ready += GetGuildAsync;
+			client.Ready += GetGuilds;
 
-			await client.LoginAsync(TokenType.Bot, token);
-			await client.StartAsync();
+			client.LoginAsync(TokenType.Bot, _token);
+			client.StartAsync();
 
 		}
 		catch (Exception ex)
@@ -82,58 +135,46 @@ class DiscordClientModel : IDiscordClientModel
 			Trace.WriteLine(DateTime.Now.ToString() + " " + ex.Message + "\n" + ex.ToString);
 		}
 	}
-	async Task GetGuildAsync()
+	async Task GetGuilds() => Guilds = new ObservableCollection<SocketGuild>(client.Guilds);
+	void GetGuildData()
 	{
-		_guild = client.GetGuild(908016523736645712);
-		await _guild.DownloadUsersAsync();
+		GuildChannels = new ObservableCollection<SocketTextChannel>(Guild.TextChannels);
+		GuildUsers = new ObservableCollection<SocketGuildUser>(Guild.Users);
 	}
-	public void ConfigurePlayers(ObservableCollection<Player> Players)
+	public async Task SendToLogChannel(string message)
 	{
-		foreach(Player player in Players)
-		{
-			var user = _guild.GetUser(player.Id);
-			player.Name = user.Nickname ?? user.Username;
-			player.User = user;
-		}
+		if (AnnouncementChannel == null) return;
+		await LogChannel.SendMessageAsync(message);
 	}
-	public void Send(string message, ulong id = 970726830887804978)
+	public async Task SendToAnnounceChannel(string message)
 	{
-		SocketChannel channel = client.GetChannel(id);
-		_ = channel ?? throw new InvalidOperationException("Cannot find channel by ID");
-		((SocketTextChannel)channel).SendMessageAsync(message);
-		Thread.Sleep(1000);
+		if (AnnouncementChannel == null) return;
+		await AnnouncementChannel.SendMessageAsync(message);
 	}
-	public void SendToUserById(ulong id, string message)
+	public async void SendInitialStatus(ObservableCollection<Player> Players, IGameModeModel mode, ulong id = 970726830887804978)
 	{
-		var user = client.GetUserAsync(id).Result;
-		user.SendMessageAsync(message);
-	}
-	public void SendStart(string message, ObservableCollection<Player> Players)
-	{
-		throw new NotImplementedException();
-	}
-	public void SendInitialStatus(ObservableCollection<Player> Players, IGameModeModel mode, ulong id = 970726830887804978)
-	{
-		Send("---------------------------------------\n" + "New game", id);
-		Send("Modificators: \n" +
+		await SendToLogChannel("---------------------------------------\n" + "New game");
+		await SendToLogChannel("Modificators: \n" +
 			"Is defence stunning: " + mode.IsDefenseStunning.ToString() +
-			"\nIs Curator Can Check: " + mode.IsCuratorCanCheck.ToString() +
+			"\nIs Godfather Can Check: " + mode.IsGodfatherCanCheck.ToString() +
 			"\nIs Chief Limited Kills: " + mode.IsChiefLimitedKills.ToString() +
 			"\nChief Limited Kills: " + mode.ChiefLimitedKills.ToString() +
-			"\nIs Chief Cannot Kill Checked: " + mode.IsChiefCannotKillChecked.ToString(), id);
-		SendStatus(Players, id);
-		foreach (var player in Players)player.User.SendMessageAsync(Templates.RoleTemplates[player.Role]);
+			"\nIs Chief Cannot Kill Checked: " + mode.IsChiefCannotKillChecked.ToString());
+		SendStatus(Players);
+		foreach (var player in Players)
+		{
+			if (player.User == null) return;
+			player.User.SendMessageAsync(Templates.RoleTemplates[player.Role]);
+		}
 	}
-	public void SendStatus(ObservableCollection<Player> Players, ulong id = 970726830887804978)
+	public async void SendStatus(ObservableCollection<Player> Players)
 	{
-		Send(" \n-------------------\nNew Status:", id);
+		await SendToLogChannel(" \n-------------------\nNew Status:");
 		string message = "";
-		foreach(Player player in Players)message += $"<@{player.Id}> - " + player.Role.ToString() + " - " + player.Status.ToString() + "\n";
-		Send(message,id);
+		foreach (Player player in Players) message += $"<@{player.Id}> - " + player.Role.ToString() + " - " + player.Status.ToString() + "\n";
+		await SendToLogChannel(message);
 	}
-	#endregion
 
-	#region Handlers and Delegates
 	/// <summary>
 	/// Logging to trace
 	/// </summary>
@@ -153,8 +194,7 @@ class DiscordClientModel : IDiscordClientModel
 	private Task CommandsHandler(SocketMessage msg)
 	{
 		if (msg.Author.IsBot) return Task.CompletedTask;
-		if (msg.Content.Contains("!target")) SendToUserById(413693028713365514, $"<@{msg.Author.Id}> targeted " + msg.Content.Substring(7));
+		if (msg.Content.Contains("!target")) GameMaster.SendMessageAsync($"<@{msg.Author.Id}> targeted " + msg.Content.Substring(7));
 		return Task.CompletedTask;
 	}
-	#endregion
 }

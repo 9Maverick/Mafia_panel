@@ -7,7 +7,7 @@ public interface IGameModeModel
 	int ChiefLimitedKills { get; set; }
 	bool IsChiefCannotKillChecked { get; set; }
 	bool IsChiefLimitedKills { get; set; }
-	bool IsCuratorCanCheck { get; set; }
+	bool IsGodfatherCanCheck { get; set; }
 	bool IsDefenseStunning { get; set; }
 }
 
@@ -20,7 +20,7 @@ public class GameModeModel : ViewModelBase, IGameModeModel
 		set => SetProperty(ref _isDefenseStunning, value);
 	}
 	private bool _isCuratorCanCheck = false;
-	public bool IsCuratorCanCheck
+	public bool IsGodfatherCanCheck
 	{
 		get => _isCuratorCanCheck;
 		set => SetProperty(ref _isCuratorCanCheck, value);
