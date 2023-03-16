@@ -1,8 +1,8 @@
 ﻿using Mafia_panel.Models;
 using Mafia_panel.Core;
-using System.Windows;
 using System.Collections.ObjectModel;
 using Discord;
+using System.Linq;
 
 namespace Mafia_panel.ViewModels;
 
@@ -58,12 +58,18 @@ class NightViewModel : ViewModelBase
 		_discordClient = discordClient;
 		_windowModel = windowModel;
 	}
+
+	/// <summary>
+	/// Setups <see cref="ActorPlayer"/> <see cref="ActionName"/> <see cref="TargetPlayer"/> <br/>
+	/// and sends possible targets list via <see cref="Player.User"/>
+	/// </summary>
 	void InitializeTurn()
 	{
-		foreach (var player in Players) 
-			if (player.Role == ActorPlayerRole) 
-				ActorPlayer = player;
+		ActorPlayer = Players
+			.Where(player => player.Role == ActorPlayerRole)
+			.First();
 
+		// Setting actions names
 		switch (ActorPlayerRole)
 		{
 			case PlayerRole.Chief:
@@ -82,11 +88,20 @@ class NightViewModel : ViewModelBase
 				break;
 		}
 
-		TargetPlayer = Players[0];
+		TargetPlayer = Players.First();
+
+		//Sending message with possible targets
 		string message = "";
-		for (int i = 0; i < Players.Count; i++) message += $"{i + 1}. {Players[i].Name}" + "\n";
+		for (int i = 0; i < Players.Count; i++)
+		{
+			message += $"{i + 1}. {Players[i].Name}" + "\n";
+		}
 		ActorPlayer.User.SendMessageAsync("Your Turn, choose target by \"!target <number of target>\" Example:\n!target 3\n" + "Targets:\n" + message);
 	}
+	/// <summary>
+	/// Changes <see cref="ActorPlayerRole"/> if it can act this turn
+	/// </summary>
+	/// <param name="role">Role to set</param>
 	public void ChangeTurn(PlayerRole role)
 	{
 		if ((int)role == 8)
@@ -94,13 +109,13 @@ class NightViewModel : ViewModelBase
 			_windowModel.NextPhase<DayViewModel>();
 			return;
 		}
-		var playerCanAct = false;
-		foreach (var player in _playersViewModel.Players) 
-			if (player.Role == role && player.Status != PlayerStatus.Stunned1) 
-				playerCanAct = true;
+		var playerCanAct = Players
+			.Where(player => player.Role == role && player.Status != PlayerStatus.StunnedDay)
+			.Any();
+
 		if(playerCanAct)
 		{
-			_discordClient.SendToLogChannel($"{role}s Turn");
+			_discordClient.SendLog($"{role}s Turn");
 			ActorPlayerRole = role;
 			InitializeTurn();
 			return;
@@ -111,39 +126,21 @@ class NightViewModel : ViewModelBase
 	private RelayCommand _actionCommand;
 	public RelayCommand ActionCommand
 	{
-		get
+		get => _actionCommand ??(_actionCommand = new RelayCommand(obj =>
 		{
-			return _actionCommand ??
-				(_actionCommand = new RelayCommand(obj =>
-				{
-					if (MessageBox.Show($"{TargetPlayer.Name} will be {ActionName}ed \n" +
-							"Do you want to continue?",
-							"Next Turn",
-							MessageBoxButton.YesNo,
-							MessageBoxImage.Question) == MessageBoxResult.No) return;
-					bool canPerform = ActorPlayer.PlayerAction(TargetPlayer, _mode);
-					if (!canPerform) return;
-					ChangeTurn(ActorPlayerRole + 1);
-				}));
-		}
+			bool canPerform = ActorPlayer.PlayerAction(TargetPlayer, _mode);
+			if (!canPerform) return;
+			ChangeTurn(ActorPlayerRole + 1);
+		}));
 	}
 	private RelayCommand _altenativeActionCommand;
 	public RelayCommand AltenativeActionCommand
 	{
-		get
+		get => _altenativeActionCommand ?? (_altenativeActionCommand = new RelayCommand(obj =>
 		{
-			return _altenativeActionCommand ??
-				(_altenativeActionCommand = new RelayCommand(obj =>
-				{
-					if (MessageBox.Show($"{TargetPlayer.Name} will be {AlternativeActionName}ed \n" +
-							"Do you want to continue?",
-							"Next Turn",
-							MessageBoxButton.YesNo,
-							MessageBoxImage.Question) == MessageBoxResult.No) return;
-					bool canPerform = ActorPlayer.PlayerAlternativeAction(TargetPlayer, _mode);
-					if (!canPerform) return;
-					ChangeTurn(ActorPlayerRole + 1);
-				}));
-		}
+			bool canPerform = ActorPlayer.PlayerAlternativeAction(TargetPlayer, _mode);
+			if (!canPerform) return;
+			ChangeTurn(ActorPlayerRole + 1);
+		}));
 	}
 }

@@ -13,15 +13,16 @@ public partial class App : Application
 
 	public App()
 	{
+		// Setting services
 		Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
 			.ConfigureServices((hostContext, services) =>
 			{
-				services.AddSingleton<IPlayersViewModel, PlayersViewModel>(); 
 				services.AddSingleton<IGameModeModel, GameModeModel>();
+				services.AddSingleton<IPlayersViewModel, PlayersViewModel>();
 				services.AddSingleton<IDiscordClientModel, DiscordClientModel>();
 				services.AddSingleton<IMainViewModel, MainViewModel>();
 				services.AddSingleton<MainWindow>();
-				services.AddSingleton<InitialViewModel>();
+				services.AddSingleton<SettingsViewModel>();
 				services.AddSingleton<DayViewModel>();
 				services.AddSingleton<NightViewModel>();
 			})
@@ -32,6 +33,7 @@ public partial class App : Application
 	{
 		await Host!.StartAsync();
 
+		// Activating main window
 		var mainWindow = Host.Services.GetRequiredService<MainWindow>();
 		mainWindow.Show();
 		base.OnStartup(e);

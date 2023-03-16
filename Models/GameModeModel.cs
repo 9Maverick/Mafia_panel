@@ -4,13 +4,31 @@ namespace Mafia_panel.Models;
 
 public interface IGameModeModel
 {
-	int ChiefLimitedKills { get; set; }
+	/// <summary>
+	/// Defines whenever <see cref="Chief"/> can kill players that he had checked
+	/// </summary>
 	bool IsChiefCannotKillChecked { get; set; }
-	bool IsChiefLimitedKills { get; set; }
+	/// <summary>
+	/// Defines whenever <see cref="Godfather"/> can check roles of other players like <see cref="Chief"/>
+	/// </summary>
 	bool IsGodfatherCanCheck { get; set; }
+	/// <summary>
+	/// Defines whenever after <see cref="Doctor"/> defend player becomes stunned
+	/// </summary>
 	bool IsDefenseStunning { get; set; }
+	/// <summary>
+	/// Defines whenever <see cref="Chief"/> can kill only limited amount of players
+	/// </summary>
+	bool IsChiefLimitedKills { get; set; }
+	/// <summary>
+	/// Number of players <see cref="Chief"/> can kill
+	/// relevant only when <see cref="IsChiefLimitedKills"/> set to true
+	/// </summary>
+	int ChiefLimitedKills { get; set; }
 }
-
+/// <summary>
+/// Container for game rules
+/// </summary>
 public class GameModeModel : ViewModelBase, IGameModeModel
 {
 	private bool _isDefenseStunning = false;
@@ -19,11 +37,11 @@ public class GameModeModel : ViewModelBase, IGameModeModel
 		get => _isDefenseStunning;
 		set => SetProperty(ref _isDefenseStunning, value);
 	}
-	private bool _isCuratorCanCheck = false;
+	private bool _isGodfatherCanCheck = false;
 	public bool IsGodfatherCanCheck
 	{
-		get => _isCuratorCanCheck;
-		set => SetProperty(ref _isCuratorCanCheck, value);
+		get => _isGodfatherCanCheck;
+		set => SetProperty(ref _isGodfatherCanCheck, value);
 	}
 	private bool _isChiefLimitedKills = false;
 	public bool IsChiefLimitedKills

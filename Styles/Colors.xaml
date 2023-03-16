@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Colors for controls and background-->
     <Color x:Key="FlatUIDarker">#2C3E50</Color>
     <SolidColorBrush x:Key="FlatUIDarkerBrush" Color="{StaticResource FlatUIDarker}" />
     <Color x:Key="FlatUIDark">#2f4256</Color>

@@ -13,7 +13,12 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Text="{Binding ActorPlayerRole}"/>
+        <!-- Role name -->
+        <TextBlock Grid.Row="0" 
+                   HorizontalAlignment="Center"
+                   Text="{Binding ActorPlayerRole}" 
+                   Style="{StaticResource FrameworkBaseStyle}"/>
+        <!-- Players list -->
         <ListBox Grid.Row="1" ItemsSource="{Binding Players}" SelectedItem="{Binding TargetPlayer}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -24,6 +29,7 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <!-- Action controls -->
         <Button Grid.Row="2" Command="{Binding ActionCommand}" Margin="0 5" Content="{Binding ActionName}"/>
         <Button Grid.Row="3" Command="{Binding AltenativeActionCommand}" Margin="0 5" Content="{Binding AlternativeActionName}" Visibility="{Binding IsAlternativeActionVisible, Converter={StaticResource BoolToVis}}"/>
     </Grid>

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Mafia_panel.Views.InitialView"
+﻿<UserControl x:Class="Mafia_panel.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -17,6 +17,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
+            
+            <!-- Player control section -->
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -71,13 +73,17 @@
                 </Grid>
                 <Button Grid.Row="2" Command="{Binding AddRolesCommand}" Margin="0 5">Give roles</Button>
             </Grid>
+            
+            <!-- Game rules section -->
             <StackPanel Grid.Column="1" Margin="5 0 0 0">
                 <CheckBox Content="Is Defense Stunning" IsChecked="{Binding Mode.IsDefenseStunning, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <CheckBox Content="Is Godfather Can Check" IsChecked="{Binding Mode.IsCuratorCanCheck, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Content="Is Godfather Can Check" IsChecked="{Binding Mode.IsGodfatherCanCheck, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <CheckBox Content="Is Chief Cannot Kill Checked" IsChecked="{Binding Mode.IsChiefCannotKillChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <CheckBox Content="Is Chief Limited Kills" IsChecked="{Binding Mode.IsChiefLimitedKills, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <TextBox Text="{Binding Mode.ChiefLimitedKills, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Mode.IsChiefLimitedKills, Converter={StaticResource BoolToVis}}"/>
             </StackPanel>
+            
+            <!-- Discord settings section -->
             <StackPanel Grid.Column="2" Margin="5 0 0 0">
                 <CheckBox Grid.Row="0" Content="Discord" IsChecked="{Binding IsDiscordOn}"/>
                 <Grid Visibility="{Binding IsDiscordOn, Converter={StaticResource BoolToVis}}">
@@ -135,6 +141,8 @@
                 </Grid>
             </StackPanel>
         </Grid>
+        
+        <!-- Save settings button -->
         <Button Grid.Row="1" 
                 Command="{Binding SaveCommand}" 
                 Margin="0 5"

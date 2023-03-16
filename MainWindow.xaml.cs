@@ -9,7 +9,7 @@ public partial class MainWindow : Window
 	{
 		DataContext = mainViewModel;
 		mainViewModel.MainWindow = this;
-		mainViewModel.SwitchCurrentViewModelTo<InitialViewModel>();
+		mainViewModel.SwitchCurrentViewModelTo<SettingsViewModel>();
 		InitializeComponent();
 	}
 }

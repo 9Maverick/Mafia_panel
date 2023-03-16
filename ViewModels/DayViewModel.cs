@@ -1,17 +1,15 @@
 ﻿using Mafia_panel.Models;
 using Mafia_panel.Core;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows;
 using System.Linq;
 
 namespace Mafia_panel.ViewModels;
 
 internal class DayViewModel : ViewModelBase
 {
+	List<Player> _maxVotedPlayers; 
 	IPlayersViewModel _playersViewModel;
-	IDiscordClientModel _discordClient;
 	IMainViewModel _windowModel;
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 	Player _selectedPlayer;
@@ -20,80 +18,79 @@ internal class DayViewModel : ViewModelBase
 		get => _selectedPlayer ?? (_selectedPlayer = Players.FirstOrDefault());
 		set => SetProperty(ref _selectedPlayer, value);
 	}
-	private bool _isSecondTour = false;
-	public bool IsSecondTour
+	public string _targetName = "Vote";
+	public string TargetName
 	{
-		get => _isSecondTour;
-		set => SetProperty(ref _isSecondTour, value);
+		get => _targetName;
+		set => SetProperty(ref _targetName, value);
 	}
-
-	public DayViewModel(IPlayersViewModel playersViewModel, IDiscordClientModel discordClient, IMainViewModel windowModel)
+	public bool _canProceed = false;
+	public bool CanProceed
+	{
+		get => _canProceed;
+		set => SetProperty(ref _canProceed, value);
+	}
+	public DayViewModel(IPlayersViewModel playersViewModel, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
-		_discordClient = discordClient;
 		_windowModel = windowModel;
+	}
+
+	/// <summary>
+	/// Searches for players with max number of votes
+	/// </summary>
+	void GetMaxVoted()
+	{
+		// Searching players with most votes
+		var maxvotes = Players.Max(player => player.Votes);
+		_maxVotedPlayers = Players.Where(player => player.Votes == maxvotes).ToList();
+
+		// Selecting name of most voted player if able
+		switch(_maxVotedPlayers.Count)
+		{
+			case 0:
+				CanProceed = false;
+				TargetName = "Vote";
+				break;
+			case 1:
+				CanProceed = true;
+				TargetName = _maxVotedPlayers[0].Name + " will be killed";
+				break;
+			default:
+				CanProceed = true;
+				TargetName = "Nobody" + " will be killed";
+				break;
+		}
 	}
 
 	private RelayCommand _addVoteCommand;
 	public RelayCommand AddVoteCommand
 	{
-		get => _addVoteCommand ?? (_addVoteCommand = new RelayCommand(obj => SelectedPlayer.Votes++));
+		get => _addVoteCommand ?? (_addVoteCommand = new RelayCommand(obj => 
+		{
+			SelectedPlayer.Votes++;
+			GetMaxVoted();
+		}));
 	}
 	private RelayCommand _removeVoteCommand;
 	public RelayCommand RemoveVoteCommand
 	{
-		get
+		get => _removeVoteCommand ??(_removeVoteCommand = new RelayCommand(obj =>
 		{
-			return _removeVoteCommand ??
-				(_removeVoteCommand = new RelayCommand(obj =>
-				{
-					SelectedPlayer.Votes--;
-				}));
-		}
+			SelectedPlayer.Votes--;
+			GetMaxVoted();
+		}));
 	}
 	private RelayCommand _voteCommand;
 	public RelayCommand VoteCommand
 	{
-		get
+		get => _voteCommand ?? (_voteCommand = new RelayCommand(obj =>
 		{
-			return _voteCommand ??
-				(_voteCommand = new RelayCommand(obj =>
-				{
-					var maxvotes = 0;
-					var votedPlayers = new List<int>();
-					foreach (var player in Players)
-					{
-						if (player.Votes > maxvotes)
-						{
-							maxvotes = player.Votes;
-							votedPlayers = new List<int>
-							{
-								Players.IndexOf(player)
-							};
-						}
-						else if (player.Votes == maxvotes)
-						{
-							votedPlayers.Add(Players.IndexOf(player));
-						}
-					}
-					if (votedPlayers.Count > 1 && !IsSecondTour)
-					{
-						MessageBox.Show("Time for the second tour", "Vote", MessageBoxButton.OK, MessageBoxImage.Information);
-						IsSecondTour = true;
-						return;
-					}
-					string message;
-					if (votedPlayers.Count == 1) message = $"{Players[votedPlayers[0]].Name} will be killed \n";
-					else message = "nobody will be killed \n";
-					if (MessageBox.Show( message +
-							"Do you want to continue?",
-							"Next stage",
-							MessageBoxButton.YesNo,
-							MessageBoxImage.Question) == MessageBoxResult.No) return;
-					if(votedPlayers.Count == 1) Players[votedPlayers[0]].Kill();
-					IsSecondTour = false;
-					_windowModel.NextPhase<NightViewModel>();
-				}));
-		}
+			if (_maxVotedPlayers.Count == 1)
+			{
+				_maxVotedPlayers.First().Kill();
+			}
+			_windowModel.NextPhase<NightViewModel>();
+		}));
 	}
 }

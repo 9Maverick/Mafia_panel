@@ -1,12 +1,12 @@
 ﻿using Mafia_panel.Models;
 using Mafia_panel.Core;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Mafia_panel.ViewModels;
 
-internal class InitialViewModel : ViewModelBase
+internal class SettingsViewModel : ViewModelBase
 {
 	IPlayersViewModel _playersViewModel;
 	IMainViewModel _windowModel;
@@ -44,7 +44,7 @@ internal class InitialViewModel : ViewModelBase
 		set => SetProperty(ref _isDiscordOn, value);
 	}
 
-	public InitialViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
+	public SettingsViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;
@@ -60,42 +60,48 @@ internal class InitialViewModel : ViewModelBase
 	private RelayCommand _removePlayerCommand;
 	public RelayCommand RemovePlayerCommand
 	{
-		get => _removePlayerCommand ?? (_removePlayerCommand = new RelayCommand(obj => Players.Remove(SelectedPlayer)));
+		get => _removePlayerCommand ?? (_removePlayerCommand = new RelayCommand(obj => 
+		{
+			if(SelectedPlayer != null) 
+			{
+				Players.Remove(SelectedPlayer);
+				return;
+			}
+			Players.Remove(Players.Last());
+		}));
 	}
 
 	private RelayCommand _addRolesCommand;
+	/// <summary>
+	/// Add <see cref="PlayerRole"/> to each <see cref="Player"/>
+	/// </summary>
 	public RelayCommand AddRolesCommand
 	{
-		get
+		get => _addRolesCommand ??(_addRolesCommand = new RelayCommand(obj =>
 		{
-			return _addRolesCommand ??
-				(_addRolesCommand = new RelayCommand(obj =>
-				{
-					if (Players.Count < 3) return;
-					foreach (Player player in Players) player.Role = PlayerRole.Civilian;
+			if (Players.Count < 3) return;
+			
+			// Setting role of everyone to Civilian
+			foreach (Player player in Players) player.Role = PlayerRole.Civilian;
 
-					var selectedPlayers = new List<int>();
-					int vivisectorCount = Players.Count / 3;
-					for (int i = 0; i < vivisectorCount; i++)
-					{
-						SetPlayerRole(PlayerRole.Mafiozo);
-					}
-					foreach (Player player in Players) if (player.Role == PlayerRole.Mafiozo) selectedPlayers.Add(Players.IndexOf(player));
-					var curatorNum = selectedPlayers[GetRandomNumber(selectedPlayers.Count)];
-					Players[curatorNum].Role = PlayerRole.Godfather;
+			// Proportionally adding some mafioso
+			int mafiozoCount = Players.Count / 3;
+			for (int i = 0; i < mafiozoCount; i++)
+			{
+				SetPlayerRole(PlayerRole.Mafioso);
+			}
 
-					
-					if (!(Players.Count < 6))   SetPlayerRole(PlayerRole.Doctor);
+			// Setting additional roles depending on number of players
+			if (!(Players.Count < 6)) SetPlayerRole(PlayerRole.Doctor);
 
-					if (!(Players.Count < 9))   SetPlayerRole(PlayerRole.Chief);
+			if (!(Players.Count < 9)) SetPlayerRole(PlayerRole.Chief);
 
-					if (!(Players.Count < 12))  SetPlayerRole(PlayerRole.Anesthesiologist);
+			if (!(Players.Count < 12)) SetPlayerRole(PlayerRole.Anesthesiologist);
 
-					if (!(Players.Count < 15))  SetPlayerRole(PlayerRole.Psychopath);
+			if (!(Players.Count < 15)) SetPlayerRole(PlayerRole.Psychopath);
 
-					IsRolesGiven = true;
-				}));
-		}
+			IsRolesGiven = true;
+		}));
 	}
 	private RelayCommand _saveCommand;
 	public RelayCommand SaveCommand
@@ -105,8 +111,9 @@ internal class InitialViewModel : ViewModelBase
 			if (_windowModel.TryContinue()) return;
 
 			_playersViewModel.SaveBackup();
-			_discordClient.SendInitialStatus(Players, _mode);
-			for (int i = 0; i < Players.Count; i++)
+
+			// Saving players in role-based classes
+			for(int i = 0; i < Players.Count; i++)
 			{
 				switch (Players[i].Role)
 				{
@@ -127,7 +134,9 @@ internal class InitialViewModel : ViewModelBase
 						break;
 				}
 			}
-			_windowModel.SwitchCurrentViewModelTo<DayViewModel>();
+			// Moving further
+			_windowModel.NextPhase<DayViewModel>();
+			_discordClient.SendInitialStatus();
 		}));
 	}
 	int GetRandomNumber(int max)
@@ -135,12 +144,15 @@ internal class InitialViewModel : ViewModelBase
 		var random = new Random();
 		return random.Next(max);
 	}
+	/// <summary>
+	/// Sets role to random <see cref="PlayerRole.Civilian"/>
+	/// </summary>
+	/// <param name="role">Role to set</param>
 	void SetPlayerRole(PlayerRole role)
 	{
-		var selectedPlayers = new List<int>();
-		foreach (Player player in Players) if (player.Role == PlayerRole.Civilian) selectedPlayers.Add(Players.IndexOf(player));
-		var roleNum = selectedPlayers[GetRandomNumber(selectedPlayers.Count)];
-		Players[roleNum].Role = role;
+		var selectedPlayers = Players.Where(player => player.Role == PlayerRole.Civilian).ToList();
+		var targetPlayer = selectedPlayers[GetRandomNumber(selectedPlayers.Count)];
+		targetPlayer.Role = role;
 	}
 	
 }

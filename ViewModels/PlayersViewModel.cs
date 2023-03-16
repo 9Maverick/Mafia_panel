@@ -9,25 +9,42 @@ namespace Mafia_panel.ViewModels;
 
 public interface IPlayersViewModel
 {
+	/// <summary>
+	/// List of active players in the game
+	/// </summary>
 	ObservableCollection<Player> Players { get; set; }
 
+	/// <summary>
+	/// Clears killed players from <see cref="Players"/>
+	/// </summary>
 	void ClearKilled();
+	/// <summary>
+	/// Cycling Stun and clears statuses from all players
+	/// </summary>
 	void ClearStatus();
-	void LoadBackup();
+	/// <summary>
+	/// Saves <see cref="Players"/>
+	/// </summary>
 	void SaveBackup();
+	/// <summary>
+	/// Loads <see cref="Players"/>
+	/// </summary>
+	void LoadBackup();
 }
 
 public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 {
 	ObservableCollection<Player> _players;
+	IGameModeModel _gameRules;
 	public ObservableCollection<Player> Players
 	{
 		get => _players;
 		set => SetProperty(ref _players, value);
 	}
 	ObservableCollection<Player> _playersBackup;
-	public PlayersViewModel()
+	public PlayersViewModel(IGameModeModel gameRules)
 	{
+		_gameRules = gameRules;
 		_players = new ObservableCollection<Player>();
 		_playersBackup = new ObservableCollection<Player>();
 	}
@@ -45,16 +62,19 @@ public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 	{
 		foreach (var player in Players)
 		{
-			if (player.Status == PlayerStatus.Stunned0)
+			if ( (player.Status == PlayerStatus.StunnedNight) || (player.Status == PlayerStatus.Defended && _gameRules.IsDefenseStunning) )
 			{
-				player.Status = PlayerStatus.Stunned1;
+				player.Status = PlayerStatus.StunnedDay;
 			}
-			else player.Status = PlayerStatus.None;
+			else
+			{
+				player.Status = PlayerStatus.None;
+			}
 		}
 	}
 	void GodfatherInherit()
 	{
-		List<Player> selectedPlayers = new List<Player>(Players.Where(player => player.Role == PlayerRole.Mafiozo));
+		List<Player> selectedPlayers = new List<Player>(Players.Where(player => player.Role == PlayerRole.Mafioso));
 
 		if (selectedPlayers.Count == 0) return;
 

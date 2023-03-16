@@ -31,10 +31,14 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <!-- Voting control -->
         <StackPanel Orientation="Horizontal" Grid.Row="1">
             <Button Command="{Binding AddVoteCommand}">+</Button>
             <Button Command="{Binding RemoveVoteCommand}">-</Button>
         </StackPanel>
-        <Button Grid.Row="2" Command="{Binding VoteCommand}" Margin="0 5">Vote</Button>
+        <Button Grid.Row="2" Margin="0 5"
+                Content="{Binding TargetName}"
+                IsEnabled="{Binding CanProceed}"
+                Command="{Binding VoteCommand}" />
     </Grid>
 </UserControl>

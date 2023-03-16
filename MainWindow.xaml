@@ -25,6 +25,7 @@
                             <Border x:Name="Container"
                                         Background="{StaticResource FlatUIDarkerBrush}"
                                         CornerRadius="10" />
+                            <!-- Window Grid-->
                             <Grid  Margin="10">
                                 <Grid.OpacityMask>
                                     <VisualBrush Visual="{Binding ElementName=Container}" />

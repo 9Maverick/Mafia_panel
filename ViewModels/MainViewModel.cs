@@ -9,16 +9,42 @@ namespace Mafia_panel.ViewModels;
 
 public interface IMainViewModel
 {
+	/// <summary>
+	/// Instance of Application window
+	/// </summary>
 	Window MainWindow { get; set; }
-	RelayCommand CloseCommand { get; }
+	/// <summary>
+	/// ViewModel of content on window
+	/// </summary>
 	ViewModelBase CurrentViewModel { get; set; }
-	RelayCommand MaximizeCommand { get; }
-	RelayCommand MenuCommand { get; }
-	RelayCommand MinimizeCommand { get; }
 
+	// Commands for window controls
+	RelayCommand CloseCommand { get; }
+	RelayCommand MaximizeCommand { get; }
+	RelayCommand MinimizeCommand { get; }
+	/// <summary>
+	/// Navigates to settings
+	/// </summary>
+	RelayCommand MenuCommand { get; }
+
+	/// <summary>
+	/// Checks if it's time to end the game
+	/// </summary>
 	bool IsGameOver();
+	/// <summary>
+	/// Changes <see cref="CurrentViewModel"/>
+	/// </summary>
+	/// <typeparam name="T">Exact type of ViewModel to switch</typeparam>
 	void SwitchCurrentViewModelTo<T>() where T : ViewModelBase;
+	/// <summary>
+	/// Clears players and statuses, checks <see cref="IsGameOver"/> and <see cref="SwitchCurrentViewModelTo{T}"/>
+	/// </summary>
+	/// <typeparam name="T">Exact type of next stage ViewModel</typeparam>
 	public void NextPhase<T>() where T : ViewModelBase;
+	/// <summary>
+	/// Sets <see cref="CurrentViewModel"/> to last ViewModel 
+	/// </summary>
+	/// <returns>Whether the operation was successful</returns>
 	bool TryContinue();
 }
 
@@ -52,7 +78,7 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 	}
 	public void NextPhase<T>() where T : ViewModelBase
 	{
-		_discordClient.SendStatus(Players);
+		_discordClient.SendStatus();
 
 		if (IsGameOver()) return;
 
@@ -68,8 +94,9 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 	}
 	public bool IsGameOver()
 	{
+		// Geting number of players in each side
 		var badGuys = Players
-			.Where(player => player.Role == PlayerRole.Mafiozo || player.Role == PlayerRole.Godfather)
+			.Where(player => player.Role == PlayerRole.Mafioso || player.Role == PlayerRole.Godfather)
 			.Count();
 		var goodGuys = Players
 			.Where(player => player.Role == PlayerRole.Chief || player.Role == PlayerRole.Civilian || player.Role == PlayerRole.Doctor)
@@ -77,6 +104,7 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 		var psycho = Players
 			.Where(player => player.Role == PlayerRole.Psychopath)
 			.Count();
+
 		if (badGuys > goodGuys + psycho)
 		{
 			Win("Mafia");
@@ -99,12 +127,15 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 		_discordClient.SendToAnnounceChannel($"Game over, {winner}  wins");
 		_playersViewModel.LoadBackup();
 		_savedViewModel = null;
-		SwitchCurrentViewModelTo<InitialViewModel>();
+		SwitchCurrentViewModelTo<SettingsViewModel>();
 	}
+	/// <summary>
+	/// Saves current game stages and navigates to <see cref="SettingsViewModel"/>
+	/// </summary>
 	void ShowMenu()
 	{
 		_savedViewModel = CurrentViewModel;
-		SwitchCurrentViewModelTo<InitialViewModel>();
+		SwitchCurrentViewModelTo<SettingsViewModel>();
 	}
 	public bool TryContinue()
 	{
