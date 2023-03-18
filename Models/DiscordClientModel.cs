@@ -67,7 +67,7 @@ class DiscordClientModel : ViewModelBase, IDiscordClientModel
 {
 	DiscordSocketClient client;
 	IPlayersViewModel _playersViewModel;
-	IGameModeModel _gameRules;
+	IGameRulesModel _gameRules;
 
 	string _token;
 	public string Token
@@ -126,7 +126,7 @@ class DiscordClientModel : ViewModelBase, IDiscordClientModel
 		set => SetProperty(ref _guildChannels, value);
 	}
 
-	public DiscordClientModel(IGameModeModel gameModeModel,IPlayersViewModel playersViewModel)
+	public DiscordClientModel(IGameRulesModel gameModeModel,IPlayersViewModel playersViewModel)
 	{
 		_playersViewModel = playersViewModel;
 		_gameRules = gameModeModel;

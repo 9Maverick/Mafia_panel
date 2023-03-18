@@ -2,7 +2,7 @@
 
 namespace Mafia_panel.Models;
 
-public interface IGameModeModel
+public interface IGameRulesModel
 {
 	/// <summary>
 	/// Defines whenever <see cref="Chief"/> can kill players that he had checked
@@ -29,7 +29,7 @@ public interface IGameModeModel
 /// <summary>
 /// Container for game rules
 /// </summary>
-public class GameModeModel : ViewModelBase, IGameModeModel
+public class GameRulesModel : ViewModelBase, IGameRulesModel
 {
 	private bool _isDefenseStunning = false;
 	public bool IsDefenseStunning

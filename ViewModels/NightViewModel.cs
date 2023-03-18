@@ -9,7 +9,7 @@ namespace Mafia_panel.ViewModels;
 class NightViewModel : ViewModelBase
 {
 	IPlayersViewModel _playersViewModel;
-	IGameModeModel _mode;
+	IGameRulesModel _mode;
 	IDiscordClientModel _discordClient;
 	IMainViewModel _windowModel;
 
@@ -51,7 +51,7 @@ class NightViewModel : ViewModelBase
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 
-	public NightViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
+	public NightViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;
@@ -79,7 +79,7 @@ class NightViewModel : ViewModelBase
 			case PlayerRole.Doctor:
 				ActionName = "Defend";
 				break;
-			case PlayerRole.Anesthesiologist:
+			case PlayerRole.Lady:
 				ActionName = "Stun";
 				break;
 			case PlayerRole.Godfather:

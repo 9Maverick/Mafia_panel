@@ -35,14 +35,14 @@ public interface IPlayersViewModel
 public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 {
 	ObservableCollection<Player> _players;
-	IGameModeModel _gameRules;
+	IGameRulesModel _gameRules;
 	public ObservableCollection<Player> Players
 	{
 		get => _players;
 		set => SetProperty(ref _players, value);
 	}
 	ObservableCollection<Player> _playersBackup;
-	public PlayersViewModel(IGameModeModel gameRules)
+	public PlayersViewModel(IGameRulesModel gameRules)
 	{
 		_gameRules = gameRules;
 		_players = new ObservableCollection<Player>();
@@ -70,6 +70,7 @@ public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 			{
 				player.Status = PlayerStatus.None;
 			}
+			player.Votes = 0;
 		}
 	}
 	void GodfatherInherit()

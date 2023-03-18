@@ -27,7 +27,7 @@ public enum PlayerRole
 	Mafioso,
 	Godfather,
 	Doctor,
-	Anesthesiologist,
+	Lady,
 	Chief,          
 	Psychopath
 }
@@ -101,7 +101,7 @@ public class Player : ViewModelBase
 	/// Kills player if his status is not <see cref="PlayerStatus.Defended"/>
 	/// </summary>
 	/// <param name="mods">game rules</param>
-	public void TryKill(IGameModeModel mods)
+	public void TryKill(IGameRulesModel mods)
 	{
 		if (!(Status == PlayerStatus.Defended))
 		{
@@ -116,11 +116,11 @@ public class Player : ViewModelBase
 	/// Changes status of player to <see cref="PlayerStatus.Killed"/>
 	/// </summary>
 	public virtual void Kill() => Status = PlayerStatus.Killed;
-	public virtual bool PlayerAction(Player target, IGameModeModel mods)
+	public virtual bool PlayerAction(Player target, IGameRulesModel mods)
 	{
 		return (Status == PlayerStatus.StunnedNight || Status == PlayerStatus.StunnedDay) ? false : true;
 	}
-	public virtual bool PlayerAlternativeAction(Player target, IGameModeModel mods) => PlayerAction(target,mods);
+	public virtual bool PlayerAlternativeAction(Player target, IGameRulesModel mods) => PlayerAction(target,mods);
 }
 class Chief : Player
 {
@@ -148,7 +148,7 @@ class Chief : Player
 	/// </summary>
 	/// <param name="target">Player to kill</param>
 	/// <param name="mods">Game modifiers</param>
-	public override bool PlayerAction(Player target, IGameModeModel mods)
+	public override bool PlayerAction(Player target, IGameRulesModel mods)
 	{
 		bool canPerform = base.PlayerAction(target, mods);
 		if (!(mods.IsChiefLimitedKills && Kills == mods.ChiefLimitedKills) || !(mods.IsChiefCannotKillChecked && CheckedPlayers.Contains(target)) && canPerform)
@@ -163,7 +163,7 @@ class Chief : Player
 	/// </summary>
 	/// <param name="target">Player to check</param>
 	/// <param name="mods">Game modifiers</param>
-	public override bool PlayerAlternativeAction(Player target, IGameModeModel mods)
+	public override bool PlayerAlternativeAction(Player target, IGameRulesModel mods)
 	{
 		bool canPerform =  base.PlayerAlternativeAction(target, mods);
 		if (!CheckedPlayers.Contains(target) && canPerform)
@@ -194,7 +194,7 @@ class Doctor : Player
 	/// </summary>
 	/// <param name="target">Player to defend</param>
 	/// <param name="mods">Game modifiers</param>
-	public override bool PlayerAction(Player target, IGameModeModel mods)
+	public override bool PlayerAction(Player target, IGameRulesModel mods)
 	{
 		bool canPerform = base.PlayerAction(target, mods);
 		if (!(this == target && SelfDefends > 0) && canPerform)
@@ -205,18 +205,18 @@ class Doctor : Player
 		return canPerform;
 	}
 }
-class Anesthesiologist : Player
+class Lady : Player
 {
-	public Anesthesiologist(Player player) : base(player) 
+	public Lady(Player player) : base(player) 
 	{
-		Role = PlayerRole.Anesthesiologist;
+		Role = PlayerRole.Lady;
 	}
 	/// <summary>
 	/// Stuns player
 	/// </summary>
 	/// <param name="target">Player to stun</param>
 	/// <param name="mods">Game modifiers</param>
-	public override bool PlayerAction(Player target, IGameModeModel mods)
+	public override bool PlayerAction(Player target, IGameRulesModel mods)
 	{
 		bool canPerform = base.PlayerAction(target, mods);
 		if (!(target.Status == PlayerStatus.Defended || target.Status == PlayerStatus.Killed) && canPerform)
@@ -237,7 +237,7 @@ class Psychopath : Player
 	/// </summary>
 	/// <param name="target">Player to kill</param>
 	/// <param name="mods">Game modifiers</param>
-	public override bool PlayerAction(Player target, IGameModeModel mods)
+	public override bool PlayerAction(Player target, IGameRulesModel mods)
 	{
 		bool canPerform = base.PlayerAction(target, mods);
 		if(canPerform)
@@ -266,7 +266,7 @@ class Godfather : Player
 	/// </summary>
 	/// <param name="target">Player to kill</param>
 	/// <param name="mods">Game modifiers</param>
-	public override bool PlayerAction(Player target, IGameModeModel mods)
+	public override bool PlayerAction(Player target, IGameRulesModel mods)
 	{
 		bool canPerform = base.PlayerAction(target, mods);
 		if (canPerform)
@@ -278,7 +278,7 @@ class Godfather : Player
 	/// </summary>
 	/// <param name="target">Player to check</param>
 	/// <param name="mods">Game modifiers</param>
-	public override bool PlayerAlternativeAction(Player target, IGameModeModel mods)
+	public override bool PlayerAlternativeAction(Player target, IGameRulesModel mods)
 	{
 		bool canPerform = base.PlayerAlternativeAction(target, mods);
 		if (!CheckedPlayers.Contains(target) && mods.IsGodfatherCanCheck && canPerform)
@@ -306,6 +306,6 @@ public static class Templates
 		{ PlayerRole.Godfather,  "" },
 		{ PlayerRole.Mafioso,  "" },
 		{ PlayerRole.Doctor, "" },
-		{ PlayerRole.Anesthesiologist, "" },
+		{ PlayerRole.Lady, "" },
 	};
 }

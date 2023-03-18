@@ -25,8 +25,8 @@ internal class SettingsViewModel : ViewModelBase
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 
-	IGameModeModel _mode;
-	public IGameModeModel Mode
+	IGameRulesModel _mode;
+	public IGameRulesModel Mode
 	{
 		get => _mode;
 		set => SetProperty(ref _mode, value);
@@ -44,7 +44,7 @@ internal class SettingsViewModel : ViewModelBase
 		set => SetProperty(ref _isDiscordOn, value);
 	}
 
-	public SettingsViewModel(IPlayersViewModel playersViewModel, IGameModeModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
+	public SettingsViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;
@@ -96,7 +96,7 @@ internal class SettingsViewModel : ViewModelBase
 
 			if (!(Players.Count < 9)) SetPlayerRole(PlayerRole.Chief);
 
-			if (!(Players.Count < 12)) SetPlayerRole(PlayerRole.Anesthesiologist);
+			if (!(Players.Count < 12)) SetPlayerRole(PlayerRole.Lady);
 
 			if (!(Players.Count < 15)) SetPlayerRole(PlayerRole.Psychopath);
 
@@ -123,8 +123,8 @@ internal class SettingsViewModel : ViewModelBase
 					case PlayerRole.Doctor:
 						Players[i] = new Doctor(Players[i]);
 						break;
-					case PlayerRole.Anesthesiologist:
-						Players[i] = new Anesthesiologist(Players[i]);
+					case PlayerRole.Lady:
+						Players[i] = new Lady(Players[i]);
 						break;
 					case PlayerRole.Chief:
 						Players[i] = new Chief(Players[i]);
