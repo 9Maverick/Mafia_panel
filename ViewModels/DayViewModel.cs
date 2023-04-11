@@ -91,6 +91,7 @@ internal class DayViewModel : ViewModelBase
 				_maxVotedPlayers.First().Kill();
 			}
 			_windowModel.NextPhase<NightViewModel>();
+			CanProceed = false;
 		}));
 	}
 }

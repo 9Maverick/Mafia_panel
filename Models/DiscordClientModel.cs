@@ -65,7 +65,7 @@ public interface IDiscordClientModel
 
 class DiscordClientModel : ViewModelBase, IDiscordClientModel
 {
-	DiscordSocketClient client;
+	DiscordSocketClient _client;
 	IPlayersViewModel _playersViewModel;
 	IGameRulesModel _gameRules;
 
@@ -140,18 +140,18 @@ class DiscordClientModel : ViewModelBase, IDiscordClientModel
 		if (string.IsNullOrEmpty(Token)) return;
 		try
 		{
-			client = new DiscordSocketClient(new DiscordSocketConfig()
+			_client = new DiscordSocketClient(new DiscordSocketConfig()
 			{
 				GatewayIntents = GatewayIntents.All,
 				AlwaysDownloadUsers = true
 			});
 
-			client.MessageReceived += CommandsHandler;
-			client.Log += Log;
-			client.Ready += GetGuilds;
+			_client.MessageReceived += CommandsHandler;
+			_client.Log += Log;
+			_client.Ready += GetGuilds;
 
-			client.LoginAsync(TokenType.Bot, _token);
-			client.StartAsync();
+			_client.LoginAsync(TokenType.Bot, _token);
+			_client.StartAsync();
 
 		}
 		catch (Exception ex)
@@ -162,7 +162,7 @@ class DiscordClientModel : ViewModelBase, IDiscordClientModel
 	/// <summary>
 	/// Getting accessible guilds from client
 	/// </summary>
-	async Task GetGuilds() => Guilds = new ObservableCollection<SocketGuild>(client.Guilds);
+	async Task GetGuilds() => Guilds = new ObservableCollection<SocketGuild>(_client.Guilds);
 	/// <summary>
 	/// Getting users and channels from <see cref="Guild"/>
 	/// </summary>
