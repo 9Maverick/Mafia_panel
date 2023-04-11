@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Icon="Source/Images/Mafia.png"
         Height="600" Width="950"
-        MinHeight="450" MinWidth="500"
+        MinHeight="525" MinWidth="825"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -50,6 +50,10 @@
                                             WindowChrome.IsHitTestVisibleInChrome="True"> 
                                         <Image Height="40" Width="40" Source="Source/Images/Mafia.png" />
                                     </Button>
+
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                Grid.Column="1">
+                                    </StackPanel>
 
                                     <!-- Window controls-->
                                     <StackPanel Grid.Column="2" Orientation="Horizontal">

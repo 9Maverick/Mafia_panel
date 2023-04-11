@@ -55,19 +55,25 @@ internal class SettingsViewModel : ViewModelBase
 	private RelayCommand _addPlayerCommand;
 	public RelayCommand AddPlayerCommand
 	{
-		get => _addPlayerCommand ??	(_addPlayerCommand = new RelayCommand(obj => Players.Add(new Player())));
+		get => _addPlayerCommand ??	(_addPlayerCommand = new RelayCommand(obj =>
+		{
+			Players.Add(new Player());
+			IsRolesGiven = false;
+		}));
 	}
 	private RelayCommand _removePlayerCommand;
 	public RelayCommand RemovePlayerCommand
 	{
 		get => _removePlayerCommand ?? (_removePlayerCommand = new RelayCommand(obj => 
 		{
+			if (!Players.Any()) return;
 			if(SelectedPlayer != null) 
 			{
 				Players.Remove(SelectedPlayer);
 				return;
 			}
 			Players.Remove(Players.Last());
+			IsRolesGiven = false;
 		}));
 	}
 

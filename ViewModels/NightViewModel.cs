@@ -78,14 +78,21 @@ class NightViewModel : ViewModelBase
 				break;
 			case PlayerRole.Doctor:
 				ActionName = "Defend";
+				IsAlternativeActionVisible = false;
 				break;
 			case PlayerRole.Lady:
 				ActionName = "Stun";
+				IsAlternativeActionVisible = false;
 				break;
 			case PlayerRole.Godfather:
 				ActionName = "Kill";
 				IsAlternativeActionVisible = _mode.IsGodfatherCanCheck;
 				break;
+			case PlayerRole.Psychopath:
+				ActionName = "Kill";
+				IsAlternativeActionVisible = false;
+				break;
+
 		}
 
 		TargetPlayer = Players.First();
@@ -110,7 +117,7 @@ class NightViewModel : ViewModelBase
 			return;
 		}
 		var playerCanAct = Players
-			.Where(player => player.Role == role && player.Status != PlayerStatus.StunnedDay)
+			.Where(player => player.Role == role && player.Status != PlayerStatus.StunnedDay && player.Status != PlayerStatus.StunnedNight)
 			.Any();
 
 		if(playerCanAct)

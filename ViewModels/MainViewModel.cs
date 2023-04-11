@@ -134,6 +134,11 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 	/// </summary>
 	void ShowMenu()
 	{
+		if(CurrentViewModel is SettingsViewModel)
+		{
+			TryContinue();
+			return;
+		}
 		_savedViewModel = CurrentViewModel;
 		SwitchCurrentViewModelTo<SettingsViewModel>();
 	}

@@ -66,7 +66,10 @@ public class Player : ViewModelBase
 		set
 		{
 			SetProperty(ref _status, value);
-			if(Status != PlayerStatus.None)User.SendMessageAsync($"You {Status}");
+			if (Status != PlayerStatus.None)
+			{
+				if(User != null)User.SendMessageAsync($"You {Status}");
+			}
 		}
 			
 	}
@@ -120,7 +123,10 @@ public class Player : ViewModelBase
 	{
 		return (Status == PlayerStatus.StunnedNight || Status == PlayerStatus.StunnedDay) ? false : true;
 	}
-	public virtual bool PlayerAlternativeAction(Player target, IGameRulesModel mods) => PlayerAction(target,mods);
+	public virtual bool PlayerAlternativeAction(Player target, IGameRulesModel mods)
+	{
+		return (Status == PlayerStatus.StunnedNight || Status == PlayerStatus.StunnedDay) ? false : true;
+	}
 }
 class Chief : Player
 {
@@ -151,7 +157,7 @@ class Chief : Player
 	public override bool PlayerAction(Player target, IGameRulesModel mods)
 	{
 		bool canPerform = base.PlayerAction(target, mods);
-		if (!(mods.IsChiefLimitedKills && Kills == mods.ChiefLimitedKills) || !(mods.IsChiefCannotKillChecked && CheckedPlayers.Contains(target)) && canPerform)
+		if (!(mods.IsChiefLimitedKills && Kills == mods.ChiefLimitedKills) && !(mods.IsChiefCannotKillChecked && CheckedPlayers.Contains(target)) && canPerform)
 		{
 			target.TryKill(mods);
 			Kills++;
@@ -168,10 +174,11 @@ class Chief : Player
 		bool canPerform =  base.PlayerAlternativeAction(target, mods);
 		if (!CheckedPlayers.Contains(target) && canPerform)
 		{
-			User.SendMessageAsync($"<@{target.User.Id}> is {target.Role}");
+			if(User != null) User.SendMessageAsync($"<@{target.User.Id}> is {target.Role}");
 			CheckedPlayers.Add(target);
+			return true;
 		}
-		return canPerform;
+		return false;
 	}
 }
 class Doctor : Player
@@ -283,14 +290,11 @@ class Godfather : Player
 		bool canPerform = base.PlayerAlternativeAction(target, mods);
 		if (!CheckedPlayers.Contains(target) && mods.IsGodfatherCanCheck && canPerform)
 		{
-			User.SendMessageAsync($"<@{target.User.Id}> is {target.Role}");
+			if (User != null) User.SendMessageAsync($"<@{target.User.Id}> is {target.Role}");
 			CheckedPlayers.Add(target);
+			return true;
 		}
-		return canPerform;
-	}
-	public override void Kill()
-	{
-		base.Kill();
+		return false;
 	}
 }
 

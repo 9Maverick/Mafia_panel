@@ -17,7 +17,7 @@ public partial class App : Application
 		Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
 			.ConfigureServices((hostContext, services) =>
 			{
-				services.AddSingleton<IGameModeModel, GameModeModel>();
+				services.AddSingleton<IGameRulesModel, GameRulesModel>();
 				services.AddSingleton<IPlayersViewModel, PlayersViewModel>();
 				services.AddSingleton<IDiscordClientModel, DiscordClientModel>();
 				services.AddSingleton<IMainViewModel, MainViewModel>();
