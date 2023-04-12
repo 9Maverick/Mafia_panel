@@ -80,10 +80,10 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 	{
 		_discordClient.SendStatus();
 
-		if (IsGameOver()) return;
-
 		_playersViewModel.ClearKilled();
 		_playersViewModel.ClearStatus();
+
+		if (IsGameOver()) return;
 
 		SwitchCurrentViewModelTo<T>();
 		if(CurrentViewModel is NightViewModel)
