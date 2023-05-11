@@ -35,30 +35,30 @@ public class GameRulesModel : ViewModelBase, IGameRulesModel
 	public bool IsDefenseStunning
 	{
 		get => _isDefenseStunning;
-		set => SetProperty(ref _isDefenseStunning, value);
+		set => SetValue(ref _isDefenseStunning, value);
 	}
 	private bool _isGodfatherCanCheck = false;
 	public bool IsGodfatherCanCheck
 	{
 		get => _isGodfatherCanCheck;
-		set => SetProperty(ref _isGodfatherCanCheck, value);
+		set => SetValue(ref _isGodfatherCanCheck, value);
 	}
 	private bool _isChiefLimitedKills = false;
 	public bool IsChiefLimitedKills
 	{
 		get => _isChiefLimitedKills;
-		set => SetProperty(ref _isChiefLimitedKills, value);
+		set => SetValue(ref _isChiefLimitedKills, value);
 	}
 	private int _chiefLimitedKills = 0;
 	public int ChiefLimitedKills
 	{
 		get => _chiefLimitedKills;
-		set => SetProperty(ref _chiefLimitedKills, value);
+		set => SetValue(ref _chiefLimitedKills, value);
 	}
 	private bool _isChiefCannotKillChecked = false;
 	public bool IsChiefCannotKillChecked
 	{
 		get => _isChiefCannotKillChecked;
-		set => SetProperty(ref _isChiefCannotKillChecked, value);
+		set => SetValue(ref _isChiefCannotKillChecked, value);
 	}
 }

@@ -39,7 +39,7 @@ public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 	public ObservableCollection<Player> Players
 	{
 		get => _players;
-		set => SetProperty(ref _players, value);
+		set => SetValue(ref _players, value);
 	}
 	ObservableCollection<Player> _playersBackup;
 	public PlayersViewModel(IGameRulesModel gameRules)

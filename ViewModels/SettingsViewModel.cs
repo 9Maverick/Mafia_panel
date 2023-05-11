@@ -3,6 +3,8 @@ using Mafia_panel.Core;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Mafia_panel.Models.SocialMedia;
+using Mafia_panel.Models.SocialMedia.Discord;
 
 namespace Mafia_panel.ViewModels;
 
@@ -11,17 +13,23 @@ internal class SettingsViewModel : ViewModelBase
 	IPlayersViewModel _playersViewModel;
 	IMainViewModel _windowModel;
 
-	IDiscordClientModel _discordClient;
-	public IDiscordClientModel DiscordClientModel
+	DiscordClientModel _discordClient;
+	public DiscordClientModel DiscordClientModel
 	{
 		get => _discordClient;
-		set => SetProperty(ref _discordClient, value);
+		set => SetValue(ref _discordClient, value);
+	}
+	SocialMediaProvider _socialMediaProvider;
+	public SocialMediaProvider SocialMediaProvider
+	{
+		get => _socialMediaProvider;
+		set => SetValue(ref _socialMediaProvider, value);
 	}
 	private Player _selectedPlayer;
 	public Player SelectedPlayer
 	{
 		get => _selectedPlayer;
-		set => SetProperty(ref _selectedPlayer, value);
+		set => SetValue(ref _selectedPlayer, value);
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 
@@ -29,42 +37,36 @@ internal class SettingsViewModel : ViewModelBase
 	public IGameRulesModel Mode
 	{
 		get => _mode;
-		set => SetProperty(ref _mode, value);
+		set => SetValue(ref _mode, value);
 	}
 	private bool _isRolesGiven = false;
 	public bool IsRolesGiven
 	{
 		get => _isRolesGiven;
-		set => SetProperty(ref _isRolesGiven, value);
-	}
-	private bool _isDiscordOn = false;
-	public bool IsDiscordOn
-	{
-		get => _isDiscordOn;
-		set => SetProperty(ref _isDiscordOn, value);
+		set => SetValue(ref _isRolesGiven, value);
 	}
 
-	public SettingsViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
+	public SettingsViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, SocialMediaProvider socialMediaProvider, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;
-		_discordClient = discordClient;
+		_socialMediaProvider = socialMediaProvider;
 		_windowModel = windowModel;
 	}
 
-	private RelayCommand _addPlayerCommand;
-	public RelayCommand AddPlayerCommand
+	private Command _addPlayerCommand;
+	public Command AddPlayerCommand
 	{
-		get => _addPlayerCommand ??	(_addPlayerCommand = new RelayCommand(obj =>
+		get => _addPlayerCommand ??	(_addPlayerCommand = new Command(obj =>
 		{
 			Players.Add(new Player());
 			IsRolesGiven = false;
 		}));
 	}
-	private RelayCommand _removePlayerCommand;
-	public RelayCommand RemovePlayerCommand
+	private Command _removePlayerCommand;
+	public Command RemovePlayerCommand
 	{
-		get => _removePlayerCommand ?? (_removePlayerCommand = new RelayCommand(obj => 
+		get => _removePlayerCommand ?? (_removePlayerCommand = new Command(obj => 
 		{
 			if (!Players.Any()) return;
 			if(SelectedPlayer != null) 
@@ -77,13 +79,13 @@ internal class SettingsViewModel : ViewModelBase
 		}));
 	}
 
-	private RelayCommand _addRolesCommand;
+	private Command _addRolesCommand;
 	/// <summary>
 	/// Add <see cref="PlayerRole"/> to each <see cref="Player"/>
 	/// </summary>
-	public RelayCommand AddRolesCommand
+	public Command AddRolesCommand
 	{
-		get => _addRolesCommand ??(_addRolesCommand = new RelayCommand(obj =>
+		get => _addRolesCommand ??(_addRolesCommand = new Command(obj =>
 		{
 			if (Players.Count < 3) return;
 			
@@ -109,10 +111,10 @@ internal class SettingsViewModel : ViewModelBase
 			IsRolesGiven = true;
 		}));
 	}
-	private RelayCommand _saveCommand;
-	public RelayCommand SaveCommand
+	private Command _saveCommand;
+	public Command SaveCommand
 	{
-		get => _saveCommand ?? (_saveCommand = new RelayCommand(obj =>
+		get => _saveCommand ?? (_saveCommand = new Command(obj =>
 		{
 			if (_windowModel.TryContinue()) return;
 
@@ -141,8 +143,7 @@ internal class SettingsViewModel : ViewModelBase
 				}
 			}
 			// Moving further
-			_windowModel.NextPhase<DayViewModel>();
-			_discordClient.SendInitialStatus();
+			_windowModel.NextPhase<DayViewModel>(true);
 		}));
 	}
 	int GetRandomNumber(int max)

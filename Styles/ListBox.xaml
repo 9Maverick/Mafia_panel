@@ -9,4 +9,7 @@
         <Setter Property="Background" Value="{StaticResource FlatUIDarkBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource FlatUIDarkBrush}" />
     </Style>
+    <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource BaseStyle}">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
 </ResourceDictionary>

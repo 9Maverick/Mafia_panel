@@ -3,6 +3,8 @@ using Mafia_panel.Core;
 using System.Collections.ObjectModel;
 using Discord;
 using System.Linq;
+using Mafia_panel.Interfaces;
+using Mafia_panel.Models.SocialMedia.Discord;
 
 namespace Mafia_panel.ViewModels;
 
@@ -10,52 +12,52 @@ class NightViewModel : ViewModelBase
 {
 	IPlayersViewModel _playersViewModel;
 	IGameRulesModel _mode;
-	IDiscordClientModel _discordClient;
+	ISocialMediaProvider _socialMediaProvider;
 	IMainViewModel _windowModel;
 
 	Player _actorPlayer;
 	public Player ActorPlayer
 	{
 		get => _actorPlayer;
-		set => SetProperty(ref _actorPlayer, value);
+		set => SetValue(ref _actorPlayer, value);
 	}
 	PlayerRole _actorPlayerRole;
 	public PlayerRole ActorPlayerRole
 	{
 		get => _actorPlayerRole;
-		set => SetProperty(ref _actorPlayerRole, value);
+		set => SetValue(ref _actorPlayerRole, value);
 	}
 	Player _targetPlayer;
 	public Player TargetPlayer
 	{
 		get => _targetPlayer;
-		set => SetProperty(ref _targetPlayer, value);
+		set => SetValue(ref _targetPlayer, value);
 	}
 	private string _actionName = "Kill";
 	public string ActionName
 	{
 		get => _actionName;
-		set => SetProperty(ref _actionName, value);
+		set => SetValue(ref _actionName, value);
 	}
 	private string _alternativeActionName = "Check";
 	public string AlternativeActionName
 	{
 		get => _alternativeActionName;
-		set => SetProperty(ref _alternativeActionName, value);
+		set => SetValue(ref _alternativeActionName, value);
 	}
 	private bool _isAlternativeActionVisible = false;
 	public bool IsAlternativeActionVisible
 	{
 		get => _isAlternativeActionVisible;
-		set => SetProperty(ref _isAlternativeActionVisible, value);
+		set => SetValue(ref _isAlternativeActionVisible, value);
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 
-	public NightViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, IDiscordClientModel discordClient, IMainViewModel windowModel)
+	public NightViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, DiscordClientModel discordClient, IMainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;
-		_discordClient = discordClient;
+		_socialMediaProvider = discordClient;
 		_windowModel = windowModel;
 	}
 
@@ -103,7 +105,10 @@ class NightViewModel : ViewModelBase
 		{
 			message += $"{i + 1}. {Players[i].Name}" + "\n";
 		}
-		ActorPlayer.User.SendMessageAsync("Your Turn, choose target by \"!target <number of target>\" Example:\n!target 3\n" + "Targets:\n" + message);
+		if (ActorPlayer.User != null)
+		{
+			ActorPlayer.User.SendMessage("Your Turn, choose target by \"!target <number of target>\" Example:\n!target 3\n" + "Targets:\n" + message);
+		}
 	}
 	/// <summary>
 	/// Changes <see cref="ActorPlayerRole"/> if it can act this turn
@@ -122,7 +127,7 @@ class NightViewModel : ViewModelBase
 
 		if(playerCanAct)
 		{
-			_discordClient.SendLog($"{role}s Turn");
+			_socialMediaProvider.SendLog($"{role}s Turn");
 			ActorPlayerRole = role;
 			InitializeTurn();
 			return;
@@ -130,20 +135,20 @@ class NightViewModel : ViewModelBase
 		ChangeTurn(role + 1);
 	}
 	 
-	private RelayCommand _actionCommand;
-	public RelayCommand ActionCommand
+	private Command _actionCommand;
+	public Command ActionCommand
 	{
-		get => _actionCommand ??(_actionCommand = new RelayCommand(obj =>
+		get => _actionCommand ??(_actionCommand = new Command(obj =>
 		{
 			bool canPerform = ActorPlayer.PlayerAction(TargetPlayer, _mode);
 			if (!canPerform) return;
 			ChangeTurn(ActorPlayerRole + 1);
 		}));
 	}
-	private RelayCommand _altenativeActionCommand;
-	public RelayCommand AltenativeActionCommand
+	private Command _altenativeActionCommand;
+	public Command AltenativeActionCommand
 	{
-		get => _altenativeActionCommand ?? (_altenativeActionCommand = new RelayCommand(obj =>
+		get => _altenativeActionCommand ?? (_altenativeActionCommand = new Command(obj =>
 		{
 			bool canPerform = ActorPlayer.PlayerAlternativeAction(TargetPlayer, _mode);
 			if (!canPerform) return;

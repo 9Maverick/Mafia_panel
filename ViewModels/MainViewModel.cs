@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using Mafia_panel.Core;
 using Mafia_panel.Models;
+using Mafia_panel.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mafia_panel.ViewModels;
@@ -19,13 +20,13 @@ public interface IMainViewModel
 	ViewModelBase CurrentViewModel { get; set; }
 
 	// Commands for window controls
-	RelayCommand CloseCommand { get; }
-	RelayCommand MaximizeCommand { get; }
-	RelayCommand MinimizeCommand { get; }
+	Command CloseCommand { get; }
+	Command MaximizeCommand { get; }
+	Command MinimizeCommand { get; }
 	/// <summary>
 	/// Navigates to settings
 	/// </summary>
-	RelayCommand MenuCommand { get; }
+	Command MenuCommand { get; }
 
 	/// <summary>
 	/// Checks if it's time to end the game
@@ -40,7 +41,7 @@ public interface IMainViewModel
 	/// Clears players and statuses, checks <see cref="IsGameOver"/> and <see cref="SwitchCurrentViewModelTo{T}"/>
 	/// </summary>
 	/// <typeparam name="T">Exact type of next stage ViewModel</typeparam>
-	public void NextPhase<T>() where T : ViewModelBase;
+	public void NextPhase<T>(bool isStart = false) where T : ViewModelBase;
 	/// <summary>
 	/// Sets <see cref="CurrentViewModel"/> to last ViewModel 
 	/// </summary>
@@ -50,38 +51,70 @@ public interface IMainViewModel
 
 public class MainViewModel : ViewModelBase, IMainViewModel
 {
-	IDiscordClientModel _discordClient;
+	ISocialMediaProvider _socialMediaProvider;
 	IPlayersViewModel _playersViewModel;
+	IGameRulesModel _gameRules;
 	ObservableCollection<Player> Players => _playersViewModel.Players;
 	ViewModelBase _savedViewModel;
 	ViewModelBase _currentViewModel;
 	public ViewModelBase CurrentViewModel
 	{
 		get => _currentViewModel;
-		set => SetProperty(ref _currentViewModel, value);
+		set => SetValue(ref _currentViewModel, value);
 	}
 	private Window _window;
 	public Window MainWindow
 	{
 		get => _window;
-		set => SetProperty(ref _window, value);
+		set => SetValue(ref _window, value);
 	}
 
-	public MainViewModel(IPlayersViewModel playersViewModel, IDiscordClientModel discordClient)
+	public MainViewModel(IPlayersViewModel playersViewModel, ISocialMediaProvider socialMediaProvider, IGameRulesModel gameModeModel)
 	{
 		_playersViewModel = playersViewModel;
-		_discordClient = discordClient;
+		_socialMediaProvider = socialMediaProvider;
+		_gameRules = gameModeModel;
 	}
 	public void SwitchCurrentViewModelTo<T>() where T : ViewModelBase
 	{
 		CurrentViewModel = App.Host.Services.GetRequiredService<T>();
 	}
-	public void NextPhase<T>() where T : ViewModelBase
+	public void NextPhase<T>(bool isStart = false) where T : ViewModelBase
 	{
-		_discordClient.SendStatus();
+		if(isStart)
+		{
+			_socialMediaProvider.SendLog("---------------------------------------\n" + "New game");
+			_socialMediaProvider.SendLog("Modifications: " + "\n" +
+				"Is defense stunning: " + _gameRules.IsDefenseStunning.ToString() + "\n" +
+				"Is Godfather Can Check: " + _gameRules.IsGodfatherCanCheck.ToString() + "\n" +
+				"Is Chief Limited Kills: " + _gameRules.IsChiefLimitedKills.ToString() + "\n" +
+				"Chief Limited Kills: " + _gameRules.ChiefLimitedKills.ToString() + "\n" +
+				"Is Chief Cannot Kill Checked: " + _gameRules.IsChiefCannotKillChecked.ToString());
+		}
+
+		_socialMediaProvider.SendLog(" \n-------------------\nStatus:");
+		string message = "";
+		// Getting information for each player
+		foreach (Player player in _playersViewModel.Players)
+		{
+			if (player.User != null)
+			{
+				message += $"{player.Name} - " + player.Role.ToString() + " - " + player.Status.ToString() + "\n";
+			}
+		}
+		_socialMediaProvider.SendLog(message);
 
 		_playersViewModel.ClearKilled();
 		_playersViewModel.ClearStatus();
+
+		if(isStart)
+		{
+			// Send to each player information about their roles
+			foreach (var player in _playersViewModel.Players)
+			{
+				if (player.User != null) player.User.SendMessage(Templates.RoleTemplates[player.Role]);
+			}
+		}
 
 		if (IsGameOver()) return;
 
@@ -124,7 +157,7 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 	}
 	void Win(string winner)
 	{
-		_discordClient.SendToAnnounceChannel($"Game over, {winner}  wins");
+		_socialMediaProvider.SendToChat($"Game over, {winner}  wins");
 		_playersViewModel.LoadBackup();
 		_savedViewModel = null;
 		SwitchCurrentViewModelTo<SettingsViewModel>();
@@ -149,26 +182,26 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 		return true;
 	}
 
-	private RelayCommand _minimizeCommand;
-	public RelayCommand MinimizeCommand
+	private Command _minimizeCommand;
+	public Command MinimizeCommand
 	{
-		get => _minimizeCommand ?? (_minimizeCommand = new RelayCommand(obj => MainWindow.WindowState = WindowState.Minimized));
+		get => _minimizeCommand ?? (_minimizeCommand = new Command(obj => MainWindow.WindowState = WindowState.Minimized));
 	}
 
-	private RelayCommand _maximizeCommand;
-	public RelayCommand MaximizeCommand
+	private Command _maximizeCommand;
+	public Command MaximizeCommand
 	{
-		get => _maximizeCommand ?? (_maximizeCommand = new RelayCommand(obj => MainWindow.WindowState ^= WindowState.Maximized));
+		get => _maximizeCommand ?? (_maximizeCommand = new Command(obj => MainWindow.WindowState ^= WindowState.Maximized));
 	}
 
-	private RelayCommand _closeCommand;
-	public RelayCommand CloseCommand
+	private Command _closeCommand;
+	public Command CloseCommand
 	{
-		get => _closeCommand ?? (_closeCommand = new RelayCommand(obj => MainWindow.Close()));
+		get => _closeCommand ?? (_closeCommand = new Command(obj => MainWindow.Close()));
 	}
-	private RelayCommand _menuCommand;
-	public RelayCommand MenuCommand
+	private Command _menuCommand;
+	public Command MenuCommand
 	{
-		get => _menuCommand ?? (_menuCommand = new RelayCommand(obj => ShowMenu()));
+		get => _menuCommand ?? (_menuCommand = new Command(obj => ShowMenu()));
 	}
 }

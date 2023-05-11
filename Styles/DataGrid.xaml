@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Base style for DataGrids -->
+    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource BaseStyle}">
+        <Setter Property="Background" Value="{StaticResource FlatUIDarkBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource FlatUIDarkBrush}" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="0 5 0 5" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="GridLinesVisibility" Value="None"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="HeadersVisibility" Value="None"/>
+    </Style>
+    <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource BaseStyle}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="0 5 0 5" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource BaseStyle}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="0 5 0 5" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+</ResourceDictionary>

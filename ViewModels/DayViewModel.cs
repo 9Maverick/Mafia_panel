@@ -16,19 +16,19 @@ internal class DayViewModel : ViewModelBase
 	public Player SelectedPlayer
 	{
 		get => _selectedPlayer ?? (_selectedPlayer = Players.FirstOrDefault());
-		set => SetProperty(ref _selectedPlayer, value);
+		set => SetValue(ref _selectedPlayer, value);
 	}
 	public string _targetName = "Vote";
 	public string TargetName
 	{
 		get => _targetName;
-		set => SetProperty(ref _targetName, value);
+		set => SetValue(ref _targetName, value);
 	}
 	public bool _canProceed = false;
 	public bool CanProceed
 	{
 		get => _canProceed;
-		set => SetProperty(ref _canProceed, value);
+		set => SetValue(ref _canProceed, value);
 	}
 	public DayViewModel(IPlayersViewModel playersViewModel, IMainViewModel windowModel)
 	{
@@ -63,28 +63,28 @@ internal class DayViewModel : ViewModelBase
 		}
 	}
 
-	private RelayCommand _addVoteCommand;
-	public RelayCommand AddVoteCommand
+	private Command _addVoteCommand;
+	public Command AddVoteCommand
 	{
-		get => _addVoteCommand ?? (_addVoteCommand = new RelayCommand(obj => 
+		get => _addVoteCommand ?? (_addVoteCommand = new Command(obj => 
 		{
 			SelectedPlayer.Votes++;
 			GetMaxVoted();
 		}));
 	}
-	private RelayCommand _removeVoteCommand;
-	public RelayCommand RemoveVoteCommand
+	private Command _removeVoteCommand;
+	public Command RemoveVoteCommand
 	{
-		get => _removeVoteCommand ??(_removeVoteCommand = new RelayCommand(obj =>
+		get => _removeVoteCommand ??(_removeVoteCommand = new Command(obj =>
 		{
 			SelectedPlayer.Votes--;
 			GetMaxVoted();
 		}));
 	}
-	private RelayCommand _voteCommand;
-	public RelayCommand VoteCommand
+	private Command _voteCommand;
+	public Command VoteCommand
 	{
-		get => _voteCommand ?? (_voteCommand = new RelayCommand(obj =>
+		get => _voteCommand ?? (_voteCommand = new Command(obj =>
 		{
 			if (_maxVotedPlayers.Count == 1)
 			{

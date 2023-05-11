@@ -10,7 +10,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected void SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = "")
+    protected void SetValue<T>(ref T property, T value, [CallerMemberName] string propertyName = "")
     {
         if (Equals(property,value)) return;
         property = value;

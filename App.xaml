@@ -10,12 +10,14 @@
             <!-- Setting converters -->
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
             <Converters:InvertedBooleanToVisibilityConverter x:Key="InvertBoolToVis"/>
-            
+            <Converters:TextBoxControlTypeToVisibilityConverter x:Key="TypeTextToVis"/>
+            <Converters:ComboBoxControlTypeToVisibilityConverter x:Key="TypeComboToVis"/>
+
             <!-- Setting DataTemplates for phases-->
             <DataTemplate DataType="{x:Type viewModel:SettingsViewModel}">
                 <view:SettingsView/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModel:DayViewModel}">
+            <DataTemplate DataType="{x:Type viewModel:DayViewModel}" >
                 <view:DayView/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:NightViewModel}">
@@ -32,6 +34,7 @@
                 <ResourceDictionary Source="Styles/CheckBox.xaml"/>
                 <ResourceDictionary Source="Styles/ComboBox.xaml"/>
                 <ResourceDictionary Source="Styles/Scroll.xaml"  />
+                <ResourceDictionary Source="Styles/DataGrid.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

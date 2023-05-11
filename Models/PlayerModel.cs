@@ -1,6 +1,5 @@
-﻿using Discord;
-using Discord.WebSocket;
-using Mafia_panel.Core;
+﻿using Mafia_panel.Core;
+using Mafia_panel.Interfaces;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -33,54 +32,37 @@ public enum PlayerRole
 }
 public class Player : ViewModelBase
 {
-	private SocketGuildUser _user;
-	/// <summary>
-	/// Player discord user
-	/// </summary>
-	public SocketGuildUser User
+	private ISocialMediaUser? _user;
+	public ISocialMediaUser? User
 	{
 		get => _user;
-		set
-		{
-			SetProperty(ref _user, value);
-			if (User == null) return;
-			Name = User.Nickname ?? User.Username;
-		}
+		set => SetValue(ref _user, value);
 	}
 	private string _name;
-	/// <summary>
-	/// Player name to show
-	/// </summary>
 	public string Name
 	{
 		get => _name;
-		set => SetProperty(ref _name, value);
+		set => SetValue(ref _name, value);
 	}
 	private PlayerStatus _status = PlayerStatus.None;
-	/// <summary>
-	/// Player current status
-	/// </summary>
 	public PlayerStatus Status
 	{
 		get => _status;
 		set
 		{
-			SetProperty(ref _status, value);
-			if (Status != PlayerStatus.None)
+			SetValue(ref _status, value);
+			if (Status != PlayerStatus.None && User != null)
 			{
-				if(User != null)User.SendMessageAsync($"You {Status}");
+				User.SendMessage($"You {Status}");
 			}
 		}
 			
 	}
 	private PlayerRole _role;
-	/// <summary>
-	/// Player role
-	/// </summary>
 	public PlayerRole Role
 	{
 		get => _role;
-		set => SetProperty(ref _role, value);
+		set => SetValue(ref _role, value);
 	}
 	private uint _votes;
 	/// <summary>
@@ -89,16 +71,21 @@ public class Player : ViewModelBase
 	public uint Votes
 	{
 		get => _votes;
-		set => SetProperty(ref _votes, value);
+		set => SetValue(ref _votes, value);
 	}
 
 	public Player(){}
 	public Player(Player player)
 	{
-		User = player.User ?? null;
+		User = player.User;
 		Name = player.Name;
 		Role = player.Role;
 		Status = player.Status;
+	}
+	public Player(ISocialMediaUser user) 
+	{ 
+		User = user;
+		Name = user.Name;
 	}
 	/// <summary>
 	/// Kills player if his status is not <see cref="PlayerStatus.Defended"/>
@@ -137,7 +124,7 @@ class Chief : Player
 	public int Kills
 	{
 		get => _kills;
-		set => SetProperty(ref _kills, value);
+		set => SetValue(ref _kills, value);
 	}
 	private ObservableCollection<Player> _checkedPlayers;
 	/// <summary>
@@ -174,7 +161,7 @@ class Chief : Player
 		bool canPerform =  base.PlayerAlternativeAction(target, mods);
 		if (!CheckedPlayers.Contains(target) && canPerform)
 		{
-			if(User != null) User.SendMessageAsync($"<@{target.User.Id}> is {target.Role}");
+			if(User != null) User.SendMessage($"{target.Name} is {target.Role}");
 			CheckedPlayers.Add(target);
 			return true;
 		}
@@ -194,7 +181,7 @@ class Doctor : Player
 	public int SelfDefends
 	{
 		get => _selfDefends;
-		set => SetProperty(ref _selfDefends, value);
+		set => SetValue(ref _selfDefends, value);
 	}
 	/// <summary>
 	/// Defends player
@@ -261,7 +248,7 @@ class Godfather : Player
 	public ObservableCollection<Player> CheckedPlayers
 	{
 		get => _checkedPlayers;
-		set => SetProperty(ref _checkedPlayers, value);
+		set => SetValue(ref _checkedPlayers, value);
 	}
 	public Godfather(Player player) : base(player) 
 	{
@@ -290,7 +277,7 @@ class Godfather : Player
 		bool canPerform = base.PlayerAlternativeAction(target, mods);
 		if (!CheckedPlayers.Contains(target) && mods.IsGodfatherCanCheck && canPerform)
 		{
-			if (User != null) User.SendMessageAsync($"<@{target.User.Id}> is {target.Role}");
+			if (User != null) User.SendMessage($"{target.Name} is {target.Role}");
 			CheckedPlayers.Add(target);
 			return true;
 		}
@@ -305,11 +292,11 @@ public static class Templates
 {
 	public static readonly Dictionary<PlayerRole, string> RoleTemplates = new Dictionary<PlayerRole, string>
 	{
-		{ PlayerRole.Chief, "" },
-		{ PlayerRole.Civilian, "" },
-		{ PlayerRole.Godfather,  "" },
-		{ PlayerRole.Mafioso,  "" },
-		{ PlayerRole.Doctor, "" },
-		{ PlayerRole.Lady, "" },
+		{ PlayerRole.Chief, "You chief" },
+		{ PlayerRole.Civilian, "You civilian" },
+		{ PlayerRole.Godfather,  "You Godfather" },
+		{ PlayerRole.Mafioso,  "You Mafioso" },
+		{ PlayerRole.Doctor, "You Doctor" },
+		{ PlayerRole.Lady, "You Lady" },
 	};
 }

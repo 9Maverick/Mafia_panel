@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace Mafia_panel.Core;
 
-public class RelayCommand : ICommand
+public class Command : ICommand
 {
     private Action<object> _execute;
     private Func<object,bool> _canExecute;
@@ -14,7 +14,7 @@ public class RelayCommand : ICommand
         remove => CommandManager.RequerySuggested -= value;
     }
 
-    public RelayCommand(Action<object> execute, Func<object,bool> canExecute = null)
+    public Command(Action<object> execute, Func<object,bool> canExecute = null)
     {
         _execute = execute;
         _canExecute = canExecute;
