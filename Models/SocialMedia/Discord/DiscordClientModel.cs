@@ -4,16 +4,12 @@ using Discord.WebSocket;
 using Mafia_panel.Core;
 using Mafia_panel.Interfaces;
 using Mafia_panel.ViewModels;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Interop;
-
 namespace Mafia_panel.Models.SocialMedia.Discord;
 
 public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSettings
@@ -199,10 +195,14 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 			if (msg.MentionedUsers.Count > 0)
 			{
 				msg.MentionedUsers.ToList()
-					.ForEach(RemovePlayer);
+					.ForEach(user =>
+						msg.Channel.SendMessageAsync(RemovePlayer(user))
+					);
 			}
-			else RemovePlayer(msg.Author);
-			msg.Channel.SendMessageAsync("User deleted");
+			else
+			{
+				msg.Channel.SendMessageAsync(RemovePlayer(msg.Author));
+			}
 			return Task.CompletedTask;
 		}
 
@@ -224,11 +224,11 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 					command.Data.Options
 						.Where(option => option.Type == ApplicationCommandOptionType.User)
 						.ToList()
-						.ForEach(option => command.RespondAsync(AddPlayer((SocketUser)option.Value)));
+						.ForEach(option => command.RespondAsync(AddPlayer((SocketUser)option.Value), ephemeral: true));
 				}
 				else
 				{
-					command.RespondAsync(AddPlayer(command.User));
+					command.RespondAsync(AddPlayer(command.User), ephemeral: true);
 				}
 				break;
 			case quitGame:
@@ -237,22 +237,21 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 					command.Data.Options
 						.Where(option => option.Type == ApplicationCommandOptionType.User)
 						.ToList()
-						.ForEach(option => RemovePlayer((SocketUser)option.Value));
+						.ForEach(option => command.RespondAsync(RemovePlayer((SocketUser)option.Value), ephemeral: true));
 				}
 				else
 				{
-					RemovePlayer(command.User);
+					command.RespondAsync(RemovePlayer(command.User), ephemeral: true);
 				}
-				command.RespondAsync("User deleted");
 				break;
 		}
 	}
 	string AddPlayer(SocketUser user)
 	{
-		if (_playersViewModel.Players
-				.Where(player => player.User.Id == (long)user.Id)
-				.Any()) return $"{user.Username} already in the game";
-		
+		if (_playersViewModel.GetPlayerByUserId((long)user.Id) != null) 
+		{
+			return $"{user.Username} already in the game";
+		}
 		App.Current.Dispatcher.Invoke(delegate
 		{
 			_playersViewModel.Players.Add
@@ -260,15 +259,18 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 		});
 		return $"{user.Username} added to the game";
 	}
-	void RemovePlayer(SocketUser user)
+	string RemovePlayer(SocketUser user)
 	{
+		if (_playersViewModel.GetPlayerByUserId((long)user.Id) == null)
+		{
+			return $"{user.Username} not found";
+		}
 		App.Current.Dispatcher.Invoke(delegate
 		{
 			_playersViewModel.Players.Remove(
-				_playersViewModel.Players
-					.FirstOrDefault(player => player.User.Id == (long)user.Id, new Player())
+				_playersViewModel.GetPlayerByUserId((long)user.Id)
 			);
 		});
-		
+		return $"{user.Username} deleted from the game";
 	}
 }

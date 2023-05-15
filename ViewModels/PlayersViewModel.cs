@@ -30,6 +30,12 @@ public interface IPlayersViewModel
 	/// Loads <see cref="Players"/>
 	/// </summary>
 	void LoadBackup();
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns> <see cref="Player"/> with specified id</returns>
+	Player? GetPlayerByUserId(long id);
 }
 
 public class PlayersViewModel : ViewModelBase, IPlayersViewModel
@@ -85,4 +91,5 @@ public class PlayersViewModel : ViewModelBase, IPlayersViewModel
 	}
 	public void SaveBackup() => _playersBackup = new ObservableCollection<Player>(Players);
 	public void LoadBackup() => Players = new ObservableCollection<Player>(_playersBackup);
+	public Player? GetPlayerByUserId(long id) => Players.FirstOrDefault(player => player.User != null && player.User.Id == id);
 }
