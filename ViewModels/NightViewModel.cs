@@ -8,7 +8,7 @@ using Mafia_panel.Models.SocialMedia.Discord;
 
 namespace Mafia_panel.ViewModels;
 
-class NightViewModel : ViewModelBase
+public class NightViewModel : ViewModelBase
 {
 	IPlayersViewModel _playersViewModel;
 	IGameRulesModel _mode;
@@ -109,6 +109,7 @@ class NightViewModel : ViewModelBase
 		{
 			ActorPlayer.User.SendMessage("Your Turn, choose target by \"!target <number of target>\" Example:\n!target 3\n" + "Targets:\n" + message);
 		}
+		ActorPlayer.CanAct = true;
 	}
 	/// <summary>
 	/// Changes <see cref="ActorPlayerRole"/> if it can act this turn
@@ -142,6 +143,7 @@ class NightViewModel : ViewModelBase
 		{
 			bool canPerform = ActorPlayer.PlayerAction(TargetPlayer, _mode);
 			if (!canPerform) return;
+			ActorPlayer.CanAct = false;
 			ChangeTurn(ActorPlayerRole + 1);
 		}));
 	}
@@ -152,6 +154,7 @@ class NightViewModel : ViewModelBase
 		{
 			bool canPerform = ActorPlayer.PlayerAlternativeAction(TargetPlayer, _mode);
 			if (!canPerform) return;
+			ActorPlayer.CanAct = false;
 			ChangeTurn(ActorPlayerRole + 1);
 		}));
 	}

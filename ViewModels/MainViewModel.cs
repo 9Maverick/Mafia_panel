@@ -124,6 +124,10 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 			var night = CurrentViewModel as NightViewModel;
 			night.ChangeTurn(PlayerRole.Godfather);
 		}
+		if (CurrentViewModel is DayViewModel)
+		{
+			Players.ToList().ForEach(player => player.CanVote = true);
+		}
 	}
 	public bool IsGameOver()
 	{

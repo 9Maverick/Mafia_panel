@@ -90,6 +90,7 @@ internal class DayViewModel : ViewModelBase
 			{
 				_maxVotedPlayers.First().Kill();
 			}
+			Players.ToList().ForEach(player => player.CanVote = false);
 			_windowModel.NextPhase<NightViewModel>();
 			CanProceed = false;
 		}));

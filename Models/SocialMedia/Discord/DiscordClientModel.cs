@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Mafia_panel.Core;
 using Mafia_panel.Interfaces;
 using Mafia_panel.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,8 +23,12 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 
 	const string joinGame = "join-game";
 	const string quitGame = "quit-game";
+	const string vote = "vote";
+	const string action = "action";
 
 	DiscordSocketClient _client;
+	IMainViewModel _mainViewModel;
+	NightViewModel _nightViewModel;
 	IPlayersViewModel _playersViewModel;
 
 	bool _isActive;
@@ -70,6 +75,8 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 		if (string.IsNullOrEmpty(token)) return;
 		try
 		{
+			_mainViewModel = App.Host.Services.GetRequiredService<IMainViewModel>();
+			_nightViewModel = App.Host.Services.GetRequiredService<NightViewModel>();
 			_client = new DiscordSocketClient(new DiscordSocketConfig()
 			{
 				GatewayIntents = GatewayIntents.All,
@@ -104,11 +111,22 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 			.WithName(quitGame)
 			.WithDescription("Removes you or specified user from the game")
 			.AddOption("user", ApplicationCommandOptionType.User, "Users to be removed from the game", isRequired: false);
+		var voteCommand = new SlashCommandBuilder()
+			.WithName(vote)
+			.WithDescription("Vote for player to kill (only available during day phase)")
+			.AddOption("player", ApplicationCommandOptionType.Integer, "Number of player to vote", isRequired: true);
+		var actCommand = new SlashCommandBuilder()
+			.WithName(action)
+			.WithDescription("Performs the action of the player role on the specified target")
+			.AddOption("player", ApplicationCommandOptionType.Integer, "Number of target player", isRequired: true)
+			.AddOption("alternative", ApplicationCommandOptionType.Boolean, "Is action alternative", isRequired: true);
 
 		try
 		{
 			await _client.CreateGlobalApplicationCommandAsync(joinCommand.Build());
 			await _client.CreateGlobalApplicationCommandAsync(quitCommand.Build());
+			await _client.CreateGlobalApplicationCommandAsync(voteCommand.Build());
+			await _client.CreateGlobalApplicationCommandAsync(actCommand.Build());
 		}
 		catch (ApplicationCommandException exception)
 		{
@@ -169,10 +187,6 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 	Task CommandsHandler(SocketMessage msg)
 	{
 		if (msg.Source != MessageSource.User) return Task.CompletedTask;
-		//if(msg.Channel == ChatChannel)
-		//{
-
-		//}
 
 		if(msg.Content.Contains("!join"))
 		{
@@ -210,7 +224,14 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 		{
 			var message = $"<@{msg.Author.Id}> targeted " + msg.Content.Substring(7);
 			SendLog(message);
+			return Task.CompletedTask;
 		}
+
+		//if(msg.Channel == ChatChannel)
+		//{
+
+		//}
+
 		return Task.CompletedTask;
 	}
 	async Task SlashCommandsHandler(SocketSlashCommand command)
@@ -218,39 +239,98 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 		switch(command.Data.Name)
 		{
 			case joinGame:
-				long id;
-				if (command.Data.Options.Count > 0)
-				{
-					command.Data.Options
-						.Where(option => option.Type == ApplicationCommandOptionType.User)
-						.ToList()
-						.ForEach(option => command.RespondAsync(AddPlayer((SocketUser)option.Value), ephemeral: true));
-				}
-				else
-				{
-					command.RespondAsync(AddPlayer(command.User), ephemeral: true);
-				}
+				JoinQuitCommandHandler(command, AddPlayer);
 				break;
 			case quitGame:
-				if (command.Data.Options.Count > 0)
-				{
-					command.Data.Options
-						.Where(option => option.Type == ApplicationCommandOptionType.User)
-						.ToList()
-						.ForEach(option => command.RespondAsync(RemovePlayer((SocketUser)option.Value), ephemeral: true));
-				}
-				else
-				{
-					command.RespondAsync(RemovePlayer(command.User), ephemeral: true);
-				}
+				JoinQuitCommandHandler(command, RemovePlayer);
+				break;
+			case vote:
+				VoteCommandHandler(command);
+				break;
+			case action:
+				ActionCommandHandler(command);
 				break;
 		}
+	}
+	void JoinQuitCommandHandler(SocketSlashCommand command, Func<SocketUser,string> addRemove)
+	{
+		if (command.Data.Options.Count > 0)
+		{
+			command.Data.Options
+				.Where(option => option.Type == ApplicationCommandOptionType.User)
+				.ToList()
+				.ForEach(option => command.RespondAsync(addRemove((SocketUser)option.Value), ephemeral: true));
+		}
+		else
+		{
+			command.RespondAsync(addRemove(command.User), ephemeral: true);
+		}
+	}
+	void ActionCommandHandler(SocketSlashCommand command)
+	{
+		var target = (int)command.Data.Options
+			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Integer).Value - 1;
+		var isAlternative = (bool)command.Data.Options
+			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Boolean);
+		var player = _playersViewModel.GetPlayerByUserId((long)command.User.Id);
+		if (player == null)
+		{
+			command.RespondAsync("You must be in the game to vote", ephemeral: true);
+			return;
+		}
+		if (!player.CanAct)
+		{
+			command.RespondAsync("It's not your turn", ephemeral: true);
+			return;
+		}
+		if (target < 0 || target >= _playersViewModel.Players.Count)
+		{
+			command.RespondAsync("Target player out of range", ephemeral: true);
+			return;
+		}
+		var nightViewModel = App.Host.Services.GetRequiredService<NightViewModel>();
+		nightViewModel.TargetPlayer = _playersViewModel.Players[target];
+		if(!isAlternative)
+		{
+			nightViewModel.ActionCommand.Execute(null);
+		}
+		else
+		{
+			nightViewModel.AltenativeActionCommand.Execute(null);
+		}
+	}
+	void VoteCommandHandler(SocketSlashCommand command)
+	{
+		var target = (int)command.Data.Options
+			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Integer).Value-1;
+		var player = _playersViewModel.GetPlayerByUserId((long)command.User.Id);
+		if (player == null)
+		{
+			command.RespondAsync("You must be in the game to vote", ephemeral: true);
+			return;
+		}
+		if (!player.CanVote)
+		{
+			command.RespondAsync("You already voted", ephemeral: true);
+			return;
+		}
+		if (target < 0 || target >= _playersViewModel.Players.Count)
+		{
+			command.RespondAsync("Target player out of range", ephemeral: true);
+			return;
+		}
+		_playersViewModel.Players[target].Votes++;
+		player.CanVote = false;
 	}
 	string AddPlayer(SocketUser user)
 	{
 		if (_playersViewModel.GetPlayerByUserId((long)user.Id) != null) 
 		{
 			return $"{user.Username} already in the game";
+		}
+		if(!(_mainViewModel.CurrentViewModel is SettingsViewModel))
+		{
+			return $"Cannot add {user.Username}, game already started";
 		}
 		App.Current.Dispatcher.Invoke(delegate
 		{

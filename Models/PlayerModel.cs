@@ -73,6 +73,18 @@ public class Player : ViewModelBase
 		get => _votes;
 		set => SetValue(ref _votes, value);
 	}
+	bool _canVote = false;
+	public bool CanVote
+	{
+		get => _canVote;
+		set => SetValue(ref _canVote, value);
+	}
+	bool _canAct = false;
+	public bool CanAct
+	{
+		get => _canAct;
+		set => SetValue(ref _canAct, value);
+	}
 
 	public Player(){}
 	public Player(Player player)
