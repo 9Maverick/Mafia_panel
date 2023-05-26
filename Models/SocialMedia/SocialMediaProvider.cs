@@ -40,8 +40,9 @@ public class SocialMediaProvider : NotifyPropertyChanged, ISocialMediaProvider
         UpdateActivity();
     }
 
-    void UpdateActivity(object? sender = null, PropertyChangedEventArgs e = null)
+    void UpdateActivity(object? sender = null, PropertyChangedEventArgs args = null)
     {
+        if (args != null && !(args.PropertyName == nameof(IsActive))) return;
         IsActive = Providers.Where(provider => provider.IsActive).Any();
         ActiveProviders = new ObservableCollection<ISocialMediaProviderWithSettings>(Providers.Where(provider => provider.IsActive));
     }
