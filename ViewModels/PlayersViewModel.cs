@@ -38,7 +38,7 @@ public interface IPlayersViewModel
 	Player? GetPlayerByUserId(long id);
 }
 
-public class PlayersViewModel : ViewModelBase, IPlayersViewModel
+public class PlayersViewModel : NotifyPropertyChanged, IPlayersViewModel
 {
 	ObservableCollection<Player> _players;
 	IGameRulesModel _gameRules;

@@ -13,7 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 namespace Mafia_panel.Models.SocialMedia.Discord;
 
-public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSettings
+public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWithSettings
 {
 	const string token = "Token";
 	const string guild = "Guild";
@@ -51,10 +51,11 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 			{ guild,        new SocialMediaSetting( typeof(SocketGuild),        ControlType.ComboBox,   GetGuildData)},
 			{ gameMaster,   new SocialMediaSetting( typeof(SocketGuildUser),    ControlType.ComboBox    )},
 			{ logChannel,   new SocialMediaSetting( typeof(SocketTextChannel),  ControlType.ComboBox    )},
-			{ chatChannel,  new SocialMediaSetting( typeof(SocketTextChannel),  ControlType.ComboBox    )}
+			{ chatChannel,  new SocialMediaSetting( typeof(SocketTextChannel),  ControlType.ComboBox,   SendStart)}
 		};
 		_settings = settings.AsReadOnly();
 	}
+	void SendStart() => SendToChat("Game starting, you can join using \"/join-game\" command");
 	T? GetSettingValue<T>(string key)
 	{
 		Settings.TryGetValue(key, out var setting);
@@ -301,7 +302,7 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 	}
 	void VoteCommandHandler(SocketSlashCommand command)
 	{
-		var target = (int)command.Data.Options
+		var target = (int)(long)command.Data.Options
 			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Integer).Value-1;
 		var player = _playersViewModel.GetPlayerByUserId((long)command.User.Id);
 		if (player == null)
@@ -319,8 +320,10 @@ public class DiscordClientModel : ViewModelBase, ISocialMediaProviderWithSetting
 			command.RespondAsync("Target player out of range", ephemeral: true);
 			return;
 		}
-		_playersViewModel.Players[target].Votes++;
+		var targetPlayer = _playersViewModel.Players[target];
+		targetPlayer.Votes++;
 		player.CanVote = false;
+		command.RespondAsync($"You voted for {targetPlayer.Name}", ephemeral: true);
 	}
 	string AddPlayer(SocketUser user)
 	{

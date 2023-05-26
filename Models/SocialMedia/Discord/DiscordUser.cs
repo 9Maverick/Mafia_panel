@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Mafia_panel.Models.SocialMedia.Discord
 {
-	public class DiscordUser : ViewModelBase, ISocialMediaUser
+	public class DiscordUser : NotifyPropertyChanged, ISocialMediaUser
 	{
 		IUser _user;
 		string _name;

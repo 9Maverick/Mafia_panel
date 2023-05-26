@@ -30,7 +30,7 @@ public enum PlayerRole
 	Chief,          
 	Psychopath
 }
-public class Player : ViewModelBase
+public class Player : NotifyPropertyChanged
 {
 	private ISocialMediaUser? _user;
 	public ISocialMediaUser? User

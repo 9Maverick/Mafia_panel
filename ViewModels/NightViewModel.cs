@@ -5,10 +5,11 @@ using Discord;
 using System.Linq;
 using Mafia_panel.Interfaces;
 using Mafia_panel.Models.SocialMedia.Discord;
+using System.Windows.Media.Media3D;
 
 namespace Mafia_panel.ViewModels;
 
-public class NightViewModel : ViewModelBase
+public class NightViewModel : PhaseViewModel
 {
 	IPlayersViewModel _playersViewModel;
 	IGameRulesModel _mode;
@@ -107,7 +108,10 @@ public class NightViewModel : ViewModelBase
 		}
 		if (ActorPlayer.User != null)
 		{
-			ActorPlayer.User.SendMessage("Your Turn, choose target by \"!target <number of target>\" Example:\n!target 3\n" + "Targets:\n" + message);
+			ActorPlayer.User.SendMessage("Your Turn, choose target by \"!target <number of target>\" or \"/target <number of target>\"\n" + 
+				"Example: !target 3 or \\target 3\n" + 
+				"Targets:\n" + 
+				message);
 		}
 		ActorPlayer.CanAct = true;
 	}
@@ -135,7 +139,14 @@ public class NightViewModel : ViewModelBase
 		}
 		ChangeTurn(role + 1);
 	}
-	 
+
+	public override void OnStart()
+	{
+		ChangeTurn(PlayerRole.Godfather);
+	}
+
+	public override void OnEnd(){}
+
 	private Command _actionCommand;
 	public Command ActionCommand
 	{

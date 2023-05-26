@@ -15,7 +15,7 @@ public enum ControlType
     ComboBox
 }
 
-public class SocialMediaSetting : ViewModelBase
+public class SocialMediaSetting : NotifyPropertyChanged
 {
     public readonly Type Type;
     Action? _valueChanged;

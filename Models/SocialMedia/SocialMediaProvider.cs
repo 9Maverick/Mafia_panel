@@ -9,7 +9,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Mafia_panel.Models.SocialMedia;
-public class SocialMediaProvider : ViewModelBase, ISocialMediaProvider
+public class SocialMediaProvider : NotifyPropertyChanged, ISocialMediaProvider
 {
     ObservableCollection<ISocialMediaProviderWithSettings> _socialMediaProviders;
     public ObservableCollection<ISocialMediaProviderWithSettings> Providers

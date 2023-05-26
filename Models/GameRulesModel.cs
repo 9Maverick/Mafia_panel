@@ -29,7 +29,7 @@ public interface IGameRulesModel
 /// <summary>
 /// Container for game rules
 /// </summary>
-public class GameRulesModel : ViewModelBase, IGameRulesModel
+public class GameRulesModel : NotifyPropertyChanged, IGameRulesModel
 {
 	private bool _isDefenseStunning = false;
 	public bool IsDefenseStunning

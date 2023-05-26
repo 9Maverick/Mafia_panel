@@ -6,7 +6,7 @@ namespace Mafia_panel.Core;
 /// <summary>
 /// Base for view models with implementation of <see cref="INotifyPropertyChanged"/>
 /// </summary>
-public abstract class ViewModelBase : INotifyPropertyChanged
+public abstract class NotifyPropertyChanged : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler PropertyChanged;
 

@@ -8,7 +8,7 @@ using Mafia_panel.Models.SocialMedia.Discord;
 
 namespace Mafia_panel.ViewModels;
 
-internal class SettingsViewModel : ViewModelBase
+internal class SettingsViewModel : PhaseViewModel
 {
 	IPlayersViewModel _playersViewModel;
 	IMainViewModel _windowModel;
@@ -161,5 +161,14 @@ internal class SettingsViewModel : ViewModelBase
 		var targetPlayer = selectedPlayers[GetRandomNumber(selectedPlayers.Count)];
 		targetPlayer.Role = role;
 	}
-	
+
+	public override void OnStart()
+	{
+		SocialMediaProvider.SendToChat("Game starting, you can join using \"/join-game\" command");
+	}
+
+	public override void OnEnd()
+	{
+		SocialMediaProvider.SendToChat("Game started");
+	}
 }

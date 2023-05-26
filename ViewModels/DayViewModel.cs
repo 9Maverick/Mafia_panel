@@ -3,14 +3,17 @@ using Mafia_panel.Core;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.ComponentModel;
+using Mafia_panel.Interfaces;
 
 namespace Mafia_panel.ViewModels;
 
-internal class DayViewModel : ViewModelBase
+internal class DayViewModel : PhaseViewModel
 {
 	List<Player> _maxVotedPlayers; 
 	IPlayersViewModel _playersViewModel;
 	IMainViewModel _windowModel;
+	ISocialMediaProvider _socialMediaProvider;
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
 	Player _selectedPlayer;
 	public Player SelectedPlayer
@@ -24,16 +27,11 @@ internal class DayViewModel : ViewModelBase
 		get => _targetName;
 		set => SetValue(ref _targetName, value);
 	}
-	public bool _canProceed = false;
-	public bool CanProceed
-	{
-		get => _canProceed;
-		set => SetValue(ref _canProceed, value);
-	}
-	public DayViewModel(IPlayersViewModel playersViewModel, IMainViewModel windowModel)
+	public DayViewModel(IPlayersViewModel playersViewModel, IMainViewModel windowModel, ISocialMediaProvider socialMediaProvider)
 	{
 		_playersViewModel = playersViewModel;
 		_windowModel = windowModel;
+		_socialMediaProvider = socialMediaProvider;
 	}
 
 	/// <summary>
@@ -45,22 +43,53 @@ internal class DayViewModel : ViewModelBase
 		var maxvotes = Players.Max(player => player.Votes);
 		_maxVotedPlayers = Players.Where(player => player.Votes == maxvotes).ToList();
 
-		// Selecting name of most voted player if able
-		switch(_maxVotedPlayers.Count)
+		ChangeVoteState();
+	}
+	/// <summary>
+	/// Changes state of voting process depending of number of voted players with maximum amount of votes
+	/// </summary>
+	void ChangeVoteState()
+	{
+		if (_maxVotedPlayers.Count == 1)
 		{
-			case 0:
-				CanProceed = false;
-				TargetName = "Vote";
-				break;
-			case 1:
-				CanProceed = true;
-				TargetName = _maxVotedPlayers[0].Name + " will be killed";
-				break;
-			default:
-				CanProceed = true;
-				TargetName = "Nobody" + " will be killed";
-				break;
+			TargetName = _maxVotedPlayers[0].Name + " will be executed";
+			return;
 		}
+		TargetName = "Nobody" + " will be executed";
+	}
+
+	public override void OnStart()
+	{
+		Players.ToList().ForEach(player => 
+		{
+			player.CanVote = true;
+			player.PropertyChanged += OnVotesChanged;
+		});
+		//Sending message with possible vote targets
+		string message = "";
+		for (int i = 0; i < Players.Count; i++)
+		{
+			message += $"{i + 1}. {Players[i].Name}" + "\n";
+		}
+		_socialMediaProvider.SendToChat("Time to vote, choose target by \"!vote <number of target>\" or \"/vote <number of target>\"\n" +
+				"Example: !vote 3 or \\vote 3\n" +
+				"Players:\n" +
+				message);
+	}
+
+	public override void OnEnd()
+	{
+		_maxVotedPlayers.Clear();
+		Players.ToList().ForEach(player =>
+		{
+			player.CanVote = false;
+			player.PropertyChanged -= OnVotesChanged;
+		});
+	}
+	void OnVotesChanged(object? sender, PropertyChangedEventArgs args)
+	{
+		if (!(args.PropertyName == nameof(Player.Votes))) return;
+		GetMaxVoted();
 	}
 
 	private Command _addVoteCommand;
@@ -90,9 +119,7 @@ internal class DayViewModel : ViewModelBase
 			{
 				_maxVotedPlayers.First().Kill();
 			}
-			Players.ToList().ForEach(player => player.CanVote = false);
 			_windowModel.NextPhase<NightViewModel>();
-			CanProceed = false;
 		}));
 	}
 }

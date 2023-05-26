@@ -17,7 +17,7 @@ public interface IMainViewModel
 	/// <summary>
 	/// ViewModel of content on window
 	/// </summary>
-	ViewModelBase CurrentViewModel { get; set; }
+	PhaseViewModel CurrentViewModel { get; set; }
 
 	// Commands for window controls
 	Command CloseCommand { get; }
@@ -36,12 +36,12 @@ public interface IMainViewModel
 	/// Changes <see cref="CurrentViewModel"/>
 	/// </summary>
 	/// <typeparam name="T">Exact type of ViewModel to switch</typeparam>
-	void SwitchCurrentViewModelTo<T>() where T : ViewModelBase;
+	void SwitchCurrentViewModelTo<T>() where T : PhaseViewModel;
 	/// <summary>
 	/// Clears players and statuses, checks <see cref="IsGameOver"/> and <see cref="SwitchCurrentViewModelTo{T}"/>
 	/// </summary>
 	/// <typeparam name="T">Exact type of next stage ViewModel</typeparam>
-	public void NextPhase<T>(bool isStart = false) where T : ViewModelBase;
+	public void NextPhase<T>(bool isStart = false) where T : PhaseViewModel;
 	/// <summary>
 	/// Sets <see cref="CurrentViewModel"/> to last ViewModel 
 	/// </summary>
@@ -49,15 +49,15 @@ public interface IMainViewModel
 	bool TryContinue();
 }
 
-public class MainViewModel : ViewModelBase, IMainViewModel
+public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 {
 	ISocialMediaProvider _socialMediaProvider;
 	IPlayersViewModel _playersViewModel;
 	IGameRulesModel _gameRules;
 	ObservableCollection<Player> Players => _playersViewModel.Players;
-	ViewModelBase _savedViewModel;
-	ViewModelBase _currentViewModel;
-	public ViewModelBase CurrentViewModel
+	PhaseViewModel _savedViewModel;
+	PhaseViewModel _currentViewModel;
+	public PhaseViewModel CurrentViewModel
 	{
 		get => _currentViewModel;
 		set => SetValue(ref _currentViewModel, value);
@@ -75,11 +75,11 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 		_socialMediaProvider = socialMediaProvider;
 		_gameRules = gameModeModel;
 	}
-	public void SwitchCurrentViewModelTo<T>() where T : ViewModelBase
+	public void SwitchCurrentViewModelTo<T>() where T : PhaseViewModel
 	{
 		CurrentViewModel = App.Host.Services.GetRequiredService<T>();
 	}
-	public void NextPhase<T>(bool isStart = false) where T : ViewModelBase
+	public void NextPhase<T>(bool isStart = false) where T : PhaseViewModel
 	{
 		if(isStart)
 		{
@@ -97,10 +97,7 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 		// Getting information for each player
 		foreach (Player player in _playersViewModel.Players)
 		{
-			if (player.User != null)
-			{
-				message += $"{player.Name} - " + player.Role.ToString() + " - " + player.Status.ToString() + "\n";
-			}
+			message += $"{player.Name} - " + player.Role.ToString() + " - " + player.Status.ToString() + "\n";
 		}
 		_socialMediaProvider.SendLog(message);
 
@@ -118,16 +115,9 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 
 		if (IsGameOver()) return;
 
+		CurrentViewModel.OnEnd();
 		SwitchCurrentViewModelTo<T>();
-		if(CurrentViewModel is NightViewModel)
-		{
-			var night = CurrentViewModel as NightViewModel;
-			night.ChangeTurn(PlayerRole.Godfather);
-		}
-		if (CurrentViewModel is DayViewModel)
-		{
-			Players.ToList().ForEach(player => player.CanVote = true);
-		}
+		CurrentViewModel.OnStart();
 	}
 	public bool IsGameOver()
 	{
@@ -164,7 +154,7 @@ public class MainViewModel : ViewModelBase, IMainViewModel
 		_socialMediaProvider.SendToChat($"Game over, {winner}  wins");
 		_playersViewModel.LoadBackup();
 		_savedViewModel = null;
-		SwitchCurrentViewModelTo<SettingsViewModel>();
+		NextPhase<SettingsViewModel>();
 	}
 	/// <summary>
 	/// Saves current game stages and navigates to <see cref="SettingsViewModel"/>
