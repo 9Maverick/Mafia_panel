@@ -107,6 +107,7 @@ internal class DayViewModel : PhaseViewModel
 	{
 		get => _removeVoteCommand ??(_removeVoteCommand = new Command(obj =>
 		{
+			if (SelectedPlayer.Votes == 0) return;
 			SelectedPlayer.Votes--;
 			GetMaxVoted();
 		}));
