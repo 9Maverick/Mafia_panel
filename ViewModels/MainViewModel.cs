@@ -60,7 +60,12 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 	public PhaseViewModel CurrentViewModel
 	{
 		get => _currentViewModel;
-		set => SetValue(ref _currentViewModel, value);
+		set
+		{
+			if(_currentViewModel != null) _currentViewModel.OnEnd();
+			SetValue(ref _currentViewModel, value);
+			_currentViewModel.OnStart();
+		}
 	}
 	private Window _window;
 	public Window MainWindow
@@ -120,9 +125,7 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 
 		if (IsGameOver()) return;
 
-		CurrentViewModel.OnEnd();
 		SwitchCurrentViewModelTo<T>();
-		CurrentViewModel.OnStart();
 	}
 	public bool IsGameOver()
 	{
@@ -159,7 +162,7 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 		_socialMediaProvider.SendToChat($"Game over, {winner}  wins");
 		_playersViewModel.LoadBackup();
 		_savedViewModel = null;
-		NextPhase<SettingsViewModel>();
+		SwitchCurrentViewModelTo<SettingsViewModel>();
 	}
 	/// <summary>
 	/// Saves current game stages and navigates to <see cref="SettingsViewModel"/>

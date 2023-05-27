@@ -53,8 +53,6 @@ internal class SettingsViewModel : PhaseViewModel
 		_mode = mode;
 		_socialMediaProvider = socialMediaProvider;
 		_windowModel = windowModel;
-
-		_playersViewModel.Players.CollectionChanged += UpdateRolesGiven;
 	}
 
 	private Command _addPlayerCommand;
@@ -174,10 +172,13 @@ internal class SettingsViewModel : PhaseViewModel
 	}
 	void UpdateRolesGiven(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => IsRolesGiven = false;
 
-	public override void OnStart(){}
+	public override void OnStart()
+	{
+		_playersViewModel.Players.CollectionChanged += UpdateRolesGiven;
+	}
 
 	public override void OnEnd()
 	{
-		SocialMediaProvider.SendToChat("Game started");
+		_playersViewModel.Players.CollectionChanged -= UpdateRolesGiven;
 	}
 }

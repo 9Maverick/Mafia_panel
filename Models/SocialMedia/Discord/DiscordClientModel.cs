@@ -261,7 +261,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	}
 	void ActionCommandHandler(SocketSlashCommand command)
 	{
-		var target = (int)command.Data.Options
+		var target = (int)(long)command.Data.Options
 			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Integer).Value - 1;
 		var isAlternative = (bool)command.Data.Options
 			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Boolean);
@@ -290,6 +290,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		{
 			_nightViewModel.AltenativeActionCommand.Execute(null);
 		}
+		command.RespondAsync("Action applied", ephemeral: true);
 	}
 	void VoteCommandHandler(SocketSlashCommand command)
 	{
