@@ -81,19 +81,20 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 	}
 	public void NextPhase<T>(bool isStart = false) where T : PhaseViewModel
 	{
-		if(isStart)
+		string message = "";
+		if (isStart)
 		{
-			_socialMediaProvider.SendLog("---------------------------------------\n" + "New game");
-			_socialMediaProvider.SendLog("Modifications: " + "\n" +
+			message += "New game" + "\n" +
+				"Modifications: " + "\n" +
 				"Is defense stunning: " + _gameRules.IsDefenseStunning.ToString() + "\n" +
 				"Is Godfather Can Check: " + _gameRules.IsGodfatherCanCheck.ToString() + "\n" +
 				"Is Chief Limited Kills: " + _gameRules.IsChiefLimitedKills.ToString() + "\n" +
 				"Chief Limited Kills: " + _gameRules.ChiefLimitedKills.ToString() + "\n" +
-				"Is Chief Cannot Kill Checked: " + _gameRules.IsChiefCannotKillChecked.ToString());
+				"Is Chief Cannot Kill Checked: " + _gameRules.IsChiefCannotKillChecked.ToString() + "\n" + "\n";
 		}
 
-		_socialMediaProvider.SendLog(" \n-------------------\nStatus:");
-		string message = "";
+		message += "Status:" + "\n";
+		
 		// Getting information for each player
 		foreach (Player player in _playersViewModel.Players)
 		{
