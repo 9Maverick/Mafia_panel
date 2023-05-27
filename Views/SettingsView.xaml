@@ -76,47 +76,56 @@
             </StackPanel>
             
             <!-- Social media settings section -->
-            <ListBox Grid.Column="2" Margin="5 0 0 0"
+            <Grid Grid.Column="2" Margin="5 0 0 0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <ListBox Grid.Row="0"
                      x:Name="SocialMediaList"
                      ItemsSource="{Binding SocialMediaProvider.Providers}">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel>
-                            <CheckBox Grid.Row="0" Content="{Binding Name}" IsChecked="{Binding IsActive}"/>
-                            <DataGrid Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}"
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <CheckBox Grid.Row="0" Content="{Binding Name}" IsChecked="{Binding IsActive}"/>
+                                <DataGrid Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}"
                                       ItemsSource="{Binding Settings}" 
                                       Grid.Row="1"
                                       Grid.Column="0">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Binding="{Binding Key}" IsReadOnly="True"/>
-                                    <DataGridTemplateColumn IsReadOnly="True">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Grid DataContext="{Binding Value}">
-                                                    <ComboBox Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ActualWidth}"
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Binding="{Binding Key}" IsReadOnly="True"/>
+                                        <DataGridTemplateColumn IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid DataContext="{Binding Value}">
+                                                        <ComboBox Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ActualWidth}"
                                                               ItemsSource="{Binding Source, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                               SelectedItem="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                               Visibility="{Binding Control, Converter={StaticResource TypeComboToVis}}"
                                                               IsEditable="True"/>
-                                                    <TextBox Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ActualWidth}"
+                                                        <TextBox Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ActualWidth}"
                                                              Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                              Visibility="{Binding Control, Converter={StaticResource TypeTextToVis}}"/>
 
-                                                </Grid>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Button Grid.Row="2" Command="{Binding NotifyCommand}" Margin="0 5">
+                    Send notification
+                </Button>
+            </Grid>
         </Grid>
         
         <!-- Save settings button -->

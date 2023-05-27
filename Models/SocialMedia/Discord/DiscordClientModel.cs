@@ -47,15 +47,14 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		_playersViewModel = playersViewModel;
 		var settings = new Dictionary<string, SocialMediaSetting>
 		{
-			{ token,        new SocialMediaSetting( typeof(string),             ControlType.TextBox,    StartClient )},
-			{ guild,        new SocialMediaSetting( typeof(SocketGuild),        ControlType.ComboBox,   GetGuildData)},
-			{ gameMaster,   new SocialMediaSetting( typeof(SocketGuildUser),    ControlType.ComboBox    )},
-			{ logChannel,   new SocialMediaSetting( typeof(SocketTextChannel),  ControlType.ComboBox    )},
-			{ chatChannel,  new SocialMediaSetting( typeof(SocketTextChannel),  ControlType.ComboBox,   SendStart)}
+			{ token,        new SocialMediaSetting( typeof(string),				ControlType.TextBox,	StartClient )},
+			{ guild,        new SocialMediaSetting( typeof(SocketGuild),		ControlType.ComboBox,	GetGuildData)},
+			{ gameMaster,   new SocialMediaSetting( typeof(SocketGuildUser),	ControlType.ComboBox	)},
+			{ logChannel,   new SocialMediaSetting( typeof(SocketTextChannel),	ControlType.ComboBox	)},
+			{ chatChannel,  new SocialMediaSetting( typeof(SocketTextChannel),	ControlType.ComboBox	)}
 		};
 		_settings = settings.AsReadOnly();
 	}
-	void SendStart() => SendToChat("Game starting, you can join using \"/join-game\" command");
 	T? GetSettingValue<T>(string key)
 	{
 		Settings.TryGetValue(key, out var setting);

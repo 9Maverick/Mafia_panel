@@ -146,6 +146,16 @@ internal class SettingsViewModel : PhaseViewModel
 			_windowModel.NextPhase<DayViewModel>(true);
 		}));
 	}
+
+	private Command _notifyCommand;
+	public Command NotifyCommand
+	{
+		get => _notifyCommand ?? (_notifyCommand = new Command(obj =>
+		{
+			SocialMediaProvider.SendToChat("Game starting, you can join using \"/join-game\" command");
+		}));
+	}
+
 	int GetRandomNumber(int max)
 	{
 		var random = new Random();
@@ -162,10 +172,7 @@ internal class SettingsViewModel : PhaseViewModel
 		targetPlayer.Role = role;
 	}
 
-	public override void OnStart()
-	{
-		SocialMediaProvider.SendToChat("Game starting, you can join using \"/join-game\" command");
-	}
+	public override void OnStart(){}
 
 	public override void OnEnd()
 	{
