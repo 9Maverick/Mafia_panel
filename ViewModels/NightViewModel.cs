@@ -169,4 +169,13 @@ public class NightViewModel : PhaseViewModel
 			ChangeTurn(ActorPlayerRole + 1);
 		}));
 	}
+	private Command _skipCommand;
+	public Command SkipCommand
+	{
+		get => _skipCommand ?? (_skipCommand = new Command(obj =>
+		{
+			ActorPlayer.CanAct = false;
+			ChangeTurn(ActorPlayerRole + 1);
+		}));
+	}
 }

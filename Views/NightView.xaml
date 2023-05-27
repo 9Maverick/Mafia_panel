@@ -12,6 +12,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <!-- Role name -->
         <TextBlock Grid.Row="0" 
@@ -32,5 +33,6 @@
         <!-- Action controls -->
         <Button Grid.Row="2" Command="{Binding ActionCommand}" Margin="0 5" Content="{Binding ActionName}"/>
         <Button Grid.Row="3" Command="{Binding AltenativeActionCommand}" Margin="0 5" Content="{Binding AlternativeActionName}" Visibility="{Binding IsAlternativeActionVisible, Converter={StaticResource BoolToVis}}"/>
+        <Button Grid.Row="4" Command="{Binding SkipCommand}" Margin="0 5" Content="Skip"/>
     </Grid>
 </UserControl>

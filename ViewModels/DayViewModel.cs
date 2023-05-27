@@ -32,6 +32,7 @@ internal class DayViewModel : PhaseViewModel
 		_playersViewModel = playersViewModel;
 		_windowModel = windowModel;
 		_socialMediaProvider = socialMediaProvider;
+		_maxVotedPlayers = new List<Player>();
 	}
 
 	/// <summary>
