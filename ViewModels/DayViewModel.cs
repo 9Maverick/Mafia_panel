@@ -72,8 +72,8 @@ internal class DayViewModel : PhaseViewModel
 		{
 			message += $"{i + 1}. {Players[i].Name}" + "\n";
 		}
-		_socialMediaProvider.SendToChat("Time to vote, choose target by \"!vote <number of target>\" or \"/vote <number of target>\"\n" +
-				"Example: !vote 3 or \\vote 3\n" +
+		_socialMediaProvider.SendToChat("Time to vote, choose target by \"/vote <number of target>\"\n" +
+				"Example: /vote 3\n" +
 				"Players:\n" +
 				message);
 	}

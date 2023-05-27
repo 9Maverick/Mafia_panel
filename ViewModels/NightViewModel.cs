@@ -108,8 +108,8 @@ public class NightViewModel : PhaseViewModel
 		}
 		if (ActorPlayer.User != null)
 		{
-			ActorPlayer.User.SendMessage("Your Turn, choose target by \"!target <number of target>\" or \"/target <number of target>\"\n" + 
-				"Example: !target 3 or \\target 3\n" + 
+			ActorPlayer.User.SendMessage("Your Turn, choose target by \"/target <number of target>\"\n" + 
+				"Example: /target 3\n" + 
 				"Targets:\n" + 
 				message);
 		}

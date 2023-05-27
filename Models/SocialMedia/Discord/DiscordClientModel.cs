@@ -188,7 +188,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	{
 		if (msg.Source != MessageSource.User) return Task.CompletedTask;
 
-		if(msg.Content.Contains("!join"))
+		if(msg.Content.Contains("!join-game"))
 		{
 			if (msg.MentionedUsers.Count > 0)
 			{
@@ -204,7 +204,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			return Task.CompletedTask;
 		}
 
-		if(msg.Content.Contains("!quit"))
+		if(msg.Content.Contains("!quit-game"))
 		{
 			if (msg.MentionedUsers.Count > 0)
 			{
@@ -217,13 +217,6 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			{
 				msg.Channel.SendMessageAsync(RemovePlayer(msg.Author));
 			}
-			return Task.CompletedTask;
-		}
-
-		if (msg.Content.Contains("!target"))
-		{
-			var message = $"<@{msg.Author.Id}> targeted " + msg.Content.Substring(7);
-			SendLog(message);
 			return Task.CompletedTask;
 		}
 
