@@ -76,7 +76,7 @@ public class Player : NotifyPropertyChanged
 	bool _canVote = false;
 	public bool CanVote
 	{
-		get => _canVote;
+		get => _canVote && Status != PlayerStatus.StunnedDay && Status != PlayerStatus.StunnedNight;
 		set => SetValue(ref _canVote, value);
 	}
 	bool _canAct = false;

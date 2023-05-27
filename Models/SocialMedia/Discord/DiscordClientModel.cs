@@ -303,7 +303,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		}
 		if (!player.CanVote)
 		{
-			command.RespondAsync("You already voted", ephemeral: true);
+			command.RespondAsync("You cannot vote right now", ephemeral: true);
 			return;
 		}
 		if (target < 0 || target >= _playersViewModel.Players.Count)
