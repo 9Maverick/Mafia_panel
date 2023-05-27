@@ -82,6 +82,7 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 	public void NextPhase<T>(bool isStart = false) where T : PhaseViewModel
 	{
 		string message = "";
+		string chatMessage = "";
 		if (isStart)
 		{
 			message += "New game" + "\n" +
@@ -94,13 +95,16 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 		}
 
 		message += "Status:" + "\n";
-		
+		chatMessage += "Status:" + "\n";
+
 		// Getting information for each player
 		foreach (Player player in _playersViewModel.Players)
 		{
 			message += $"{player.Name} - " + player.Role.ToString() + " - " + player.Status.ToString() + "\n";
+			chatMessage += $"{player.Name} - " + player.Status.ToString() + "\n";
 		}
 		_socialMediaProvider.SendLog(message);
+		_socialMediaProvider.SendToChat(chatMessage);
 
 		_playersViewModel.ClearKilled();
 		_playersViewModel.ClearStatus();
