@@ -59,7 +59,7 @@ internal class SettingsViewModel : PhaseViewModel
 	{
 		get => _addPlayerCommand ??	(_addPlayerCommand = new Command(obj =>
 		{
-			Players.Add(new Player());
+			Players.Add(new Player("Player " + (Players.Count + 1)));
 			IsRolesGiven = false;
 		}));
 	}

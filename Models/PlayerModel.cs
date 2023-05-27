@@ -86,18 +86,22 @@ public class Player : NotifyPropertyChanged
 		set => SetValue(ref _canAct, value);
 	}
 
-	public Player(){}
+	public Player(){ }
+	public Player(string name) 
+	{
+		Name = name;
+	}
+	public Player(ISocialMediaUser user)
+	{
+		User = user;
+		Name = user.Name;
+	}
 	public Player(Player player)
 	{
 		User = player.User;
 		Name = player.Name;
 		Role = player.Role;
 		Status = player.Status;
-	}
-	public Player(ISocialMediaUser user) 
-	{ 
-		User = user;
-		Name = user.Name;
 	}
 	/// <summary>
 	/// Kills player if his status is not <see cref="PlayerStatus.Defended"/>
