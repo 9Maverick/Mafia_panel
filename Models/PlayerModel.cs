@@ -85,7 +85,7 @@ public class Player : NotifyPropertyChanged
 		get => _canAct;
 		set => SetValue(ref _canAct, value);
 	}
-
+	
 	public Player(){ }
 	public Player(string name) 
 	{

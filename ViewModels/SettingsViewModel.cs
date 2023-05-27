@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Mafia_panel.Models.SocialMedia;
 using Mafia_panel.Models.SocialMedia.Discord;
+using System.ComponentModel;
 
 namespace Mafia_panel.ViewModels;
 
@@ -52,6 +53,8 @@ internal class SettingsViewModel : PhaseViewModel
 		_mode = mode;
 		_socialMediaProvider = socialMediaProvider;
 		_windowModel = windowModel;
+
+		_playersViewModel.Players.CollectionChanged += UpdateRolesGiven;
 	}
 
 	private Command _addPlayerCommand;
@@ -60,7 +63,6 @@ internal class SettingsViewModel : PhaseViewModel
 		get => _addPlayerCommand ??	(_addPlayerCommand = new Command(obj =>
 		{
 			Players.Add(new Player("Player " + (Players.Count + 1)));
-			IsRolesGiven = false;
 		}));
 	}
 	private Command _removePlayerCommand;
@@ -75,7 +77,6 @@ internal class SettingsViewModel : PhaseViewModel
 				return;
 			}
 			Players.Remove(Players.Last());
-			IsRolesGiven = false;
 		}));
 	}
 
@@ -171,6 +172,7 @@ internal class SettingsViewModel : PhaseViewModel
 		var targetPlayer = selectedPlayers[GetRandomNumber(selectedPlayers.Count)];
 		targetPlayer.Role = role;
 	}
+	void UpdateRolesGiven(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => IsRolesGiven = false;
 
 	public override void OnStart(){}
 

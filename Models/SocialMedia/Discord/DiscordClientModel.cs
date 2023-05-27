@@ -288,15 +288,14 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			command.RespondAsync("Target player out of range", ephemeral: true);
 			return;
 		}
-		var nightViewModel = App.Host.Services.GetRequiredService<NightViewModel>();
-		nightViewModel.TargetPlayer = _playersViewModel.Players[target];
+		_nightViewModel.TargetPlayer = _playersViewModel.Players[target];
 		if(!isAlternative)
 		{
-			nightViewModel.ActionCommand.Execute(null);
+			_nightViewModel.ActionCommand.Execute(null);
 		}
 		else
 		{
-			nightViewModel.AltenativeActionCommand.Execute(null);
+			_nightViewModel.AltenativeActionCommand.Execute(null);
 		}
 	}
 	void VoteCommandHandler(SocketSlashCommand command)
