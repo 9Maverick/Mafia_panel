@@ -31,11 +31,17 @@ public interface IPlayersViewModel
 	/// </summary>
 	void LoadPlayers();
 	/// <summary>
-	/// 
+	/// Searches players from <see cref="Players"/>
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns> <see cref="Player"/> with specified id</returns>
 	Player? GetPlayerByUserId(long id);
+	/// <summary>
+	/// Searches players from <see cref="ActivePlayers"/>
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns> <see cref="Player"/> with specified id</returns>
+	Player? GetActivePlayerByUserId(long id);
 }
 
 public class PlayersViewModel : NotifyPropertyChanged, IPlayersViewModel
@@ -61,7 +67,7 @@ public class PlayersViewModel : NotifyPropertyChanged, IPlayersViewModel
 	}
 	public void ClearKilled()
 	{
-		ActivePlayers.Where(player => player.Status == PlayerStatus.Killed)
+		 ActivePlayers.Where(player => player.Status == PlayerStatus.Killed)
 			.ToList()
 			.All(ActivePlayers.Remove);
 		if (ActivePlayers.Where(player => player.Role == PlayerRole.Godfather).Count() == 0 
@@ -102,4 +108,5 @@ public class PlayersViewModel : NotifyPropertyChanged, IPlayersViewModel
 		ClearStatus();
 	}
 	public Player? GetPlayerByUserId(long id) => Players.FirstOrDefault(player => player.User != null && player.User.Id == id);
+	public Player? GetActivePlayerByUserId(long id) => ActivePlayers.FirstOrDefault(player => player.User != null && player.User.Id == id);
 }

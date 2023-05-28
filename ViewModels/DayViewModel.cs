@@ -61,7 +61,7 @@ internal class DayViewModel : PhaseViewModel
 
 	public override void OnStart()
 	{
-		Players.ToList().ForEach(player => 
+		_playersViewModel.ActivePlayers.ToList().ForEach(player => 
 		{
 			player.CanVote = true;
 			player.PropertyChanged += OnVotesChanged;
@@ -81,11 +81,12 @@ internal class DayViewModel : PhaseViewModel
 	public override void OnEnd()
 	{
 		_maxVotedPlayers.Clear();
-		Players.ToList().ForEach(player =>
+		_playersViewModel.ActivePlayers.ToList().ForEach(player =>
 		{
 			player.CanVote = false;
 			player.PropertyChanged -= OnVotesChanged;
 		});
+		TargetName = "Nobody" + " will be executed";
 	}
 	void OnVotesChanged(object? sender, PropertyChangedEventArgs args)
 	{

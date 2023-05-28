@@ -11,6 +11,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Threading;
+
 namespace Mafia_panel.Models.SocialMedia.Discord;
 
 public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWithSettings
@@ -263,7 +265,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Integer).Value - 1;
 		var isAlternative = (bool)command.Data.Options
 			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Boolean);
-		var player = _playersViewModel.GetPlayerByUserId((long)command.User.Id);
+		var player = _playersViewModel.GetActivePlayerByUserId((long)command.User.Id);
 		if (player == null)
 		{
 			command.RespondAsync("You must be in the game to vote", ephemeral: true);
@@ -282,11 +284,17 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		_nightViewModel.TargetPlayer = _playersViewModel.ActivePlayers[target];
 		if(!isAlternative)
 		{
-			_nightViewModel.ActionCommand.Execute(null);
+			App.Current.Dispatcher.Invoke(delegate
+			{
+				_nightViewModel.ActionCommand.Execute(null);
+			});
 		}
 		else
 		{
-			_nightViewModel.AltenativeActionCommand.Execute(null);
+			App.Current.Dispatcher.Invoke(delegate
+			{
+				_nightViewModel.AltenativeActionCommand.Execute(null);
+			});
 		}
 		command.RespondAsync("Action applied", ephemeral: true);
 	}
@@ -294,7 +302,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	{
 		var target = (int)(long)command.Data.Options
 			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Integer).Value-1;
-		var player = _playersViewModel.GetPlayerByUserId((long)command.User.Id);
+		var player = _playersViewModel.GetActivePlayerByUserId((long)command.User.Id);
 		if (player == null)
 		{
 			command.RespondAsync("You must be in the game to vote", ephemeral: true);
@@ -334,14 +342,12 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		{
 			return $"{user.Username} not found";
 		}
+		var player = _playersViewModel.GetPlayerByUserId((long)user.Id);
+		var activePlayer = _playersViewModel.GetActivePlayerByUserId((long)user.Id);
 		App.Current.Dispatcher.Invoke(delegate
 		{
-			_playersViewModel.ActivePlayers.Remove(
-				_playersViewModel.GetPlayerByUserId((long)user.Id)
-			);
-			_playersViewModel.Players.Remove(
-				_playersViewModel.GetPlayerByUserId((long)user.Id)
-			);
+			_playersViewModel.ActivePlayers.Remove(activePlayer);
+			_playersViewModel.Players.Remove(player);
 		});
 		return $"{user.Username} deleted from the game";
 	}
