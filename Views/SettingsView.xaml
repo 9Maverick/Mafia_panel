@@ -128,10 +128,24 @@
             </Grid>
         </Grid>
         
-        <!-- Save settings button -->
-        <Button Grid.Row="1" 
-                Command="{Binding SaveCommand}" 
-                Margin="0 5"
-                IsEnabled="{Binding IsRolesGiven}">Save settings</Button>
+        <!-- Start/Continue buttons -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0"
+                    Command="{Binding SaveCommand}" 
+                    Margin="0 5"
+                    IsEnabled="{Binding CanStart}">
+                Start game
+            </Button>
+            <Button Grid.Row="1"
+                    Command="{Binding ContinueCommand}" 
+                    Margin="0 5"
+                    Visibility="{Binding CanContinue, Converter={StaticResource BoolToVis}}">
+                Continue game
+            </Button>
+        </Grid>
     </Grid>
 </UserControl>

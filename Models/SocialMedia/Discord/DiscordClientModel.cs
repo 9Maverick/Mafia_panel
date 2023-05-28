@@ -27,7 +27,6 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	const string action = "action";
 
 	DiscordSocketClient _client;
-	IMainViewModel _mainViewModel;
 	NightViewModel _nightViewModel;
 	IPlayersViewModel _playersViewModel;
 
@@ -75,7 +74,6 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		if (string.IsNullOrEmpty(token)) return;
 		try
 		{
-			_mainViewModel = App.Host.Services.GetRequiredService<IMainViewModel>();
 			_nightViewModel = App.Host.Services.GetRequiredService<NightViewModel>();
 			_client = new DiscordSocketClient(new DiscordSocketConfig()
 			{
@@ -276,12 +274,12 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			command.RespondAsync("It's not your turn", ephemeral: true);
 			return;
 		}
-		if (target < 0 || target >= _playersViewModel.Players.Count)
+		if (target < 0 || target >= _playersViewModel.ActivePlayers.Count)
 		{
 			command.RespondAsync("Target player out of range", ephemeral: true);
 			return;
 		}
-		_nightViewModel.TargetPlayer = _playersViewModel.Players[target];
+		_nightViewModel.TargetPlayer = _playersViewModel.ActivePlayers[target];
 		if(!isAlternative)
 		{
 			_nightViewModel.ActionCommand.Execute(null);
@@ -307,12 +305,12 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			command.RespondAsync("You cannot vote right now", ephemeral: true);
 			return;
 		}
-		if (target < 0 || target >= _playersViewModel.Players.Count)
+		if (target < 0 || target >= _playersViewModel.ActivePlayers.Count)
 		{
 			command.RespondAsync("Target player out of range", ephemeral: true);
 			return;
 		}
-		var targetPlayer = _playersViewModel.Players[target];
+		var targetPlayer = _playersViewModel.ActivePlayers[target];
 		targetPlayer.Votes++;
 		player.CanVote = false;
 		command.RespondAsync($"You voted for {targetPlayer.Name}", ephemeral: true);
@@ -322,10 +320,6 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		if (_playersViewModel.GetPlayerByUserId((long)user.Id) != null) 
 		{
 			return $"{user.Username} already in the game";
-		}
-		if(!(_mainViewModel.CurrentViewModel is SettingsViewModel))
-		{
-			return $"Cannot add {user.Username}, game already started";
 		}
 		App.Current.Dispatcher.Invoke(delegate
 		{
@@ -342,6 +336,9 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		}
 		App.Current.Dispatcher.Invoke(delegate
 		{
+			_playersViewModel.ActivePlayers.Remove(
+				_playersViewModel.GetPlayerByUserId((long)user.Id)
+			);
 			_playersViewModel.Players.Remove(
 				_playersViewModel.GetPlayerByUserId((long)user.Id)
 			);

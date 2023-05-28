@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Mafia_panel.Models.SocialMedia;
 using Mafia_panel.Models.SocialMedia.Discord;
-using System.ComponentModel;
 
 namespace Mafia_panel.ViewModels;
 
@@ -33,6 +32,7 @@ internal class SettingsViewModel : PhaseViewModel
 		set => SetValue(ref _selectedPlayer, value);
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.Players;
+	public ObservableCollection<Player> ActivePlayers => _playersViewModel.ActivePlayers;
 
 	IGameRulesModel _mode;
 	public IGameRulesModel Mode
@@ -40,11 +40,17 @@ internal class SettingsViewModel : PhaseViewModel
 		get => _mode;
 		set => SetValue(ref _mode, value);
 	}
-	private bool _isRolesGiven = false;
-	public bool IsRolesGiven
+	private bool _canStart = false;
+	public bool CanStart
 	{
-		get => _isRolesGiven;
-		set => SetValue(ref _isRolesGiven, value);
+		get => _canStart;
+		set => SetValue(ref _canStart, value);
+	}
+	private bool _canContinue = false;
+	public bool CanContinue
+	{
+		get => _canContinue;
+		set => SetValue(ref _canContinue, value);
 	}
 
 	public SettingsViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, SocialMediaProvider socialMediaProvider, IMainViewModel windowModel)
@@ -107,7 +113,7 @@ internal class SettingsViewModel : PhaseViewModel
 
 			if (!(Players.Count < 15)) SetPlayerRole(PlayerRole.Psychopath);
 
-			IsRolesGiven = true;
+			CanStart = true;
 		}));
 	}
 	private Command _saveCommand;
@@ -115,35 +121,41 @@ internal class SettingsViewModel : PhaseViewModel
 	{
 		get => _saveCommand ?? (_saveCommand = new Command(obj =>
 		{
-			if (_windowModel.TryContinue()) return;
-
-			_playersViewModel.SaveBackup();
+			_playersViewModel.LoadPlayers();
 
 			// Saving players in role-based classes
-			for(int i = 0; i < Players.Count; i++)
+			for(int i = 0; i < ActivePlayers.Count; i++)
 			{
-				switch (Players[i].Role)
+				switch (ActivePlayers[i].Role)
 				{
+					case PlayerRole.None:
+						ActivePlayers.Remove(ActivePlayers[i]);
+						break;
 					case PlayerRole.Godfather:
-						Players[i] = new Godfather(Players[i]);
+						ActivePlayers[i] = new Godfather(ActivePlayers[i]);
 						break;
 					case PlayerRole.Doctor:
-						Players[i] = new Doctor(Players[i]);
+						ActivePlayers[i] = new Doctor(ActivePlayers[i]);
 						break;
 					case PlayerRole.Lady:
-						Players[i] = new Lady(Players[i]);
+						ActivePlayers[i] = new Lady(ActivePlayers[i]);
 						break;
 					case PlayerRole.Chief:
-						Players[i] = new Chief(Players[i]);
+						ActivePlayers[i] = new Chief(ActivePlayers[i]);
 						break;
 					case PlayerRole.Psychopath:
-						Players[i] = new Psychopath(Players[i]);
+						ActivePlayers[i] = new Psychopath(ActivePlayers[i]);
 						break;
 				}
 			}
 			// Moving further
 			_windowModel.NextPhase<DayViewModel>(true);
 		}));
+	}
+	Command _continueCommand;
+	public Command ContinueCommand
+	{
+		get => _continueCommand ?? (_continueCommand = new Command(obj => _windowModel.TryContinue()));
 	}
 
 	private Command _notifyCommand;
@@ -170,15 +182,17 @@ internal class SettingsViewModel : PhaseViewModel
 		var targetPlayer = selectedPlayers[GetRandomNumber(selectedPlayers.Count)];
 		targetPlayer.Role = role;
 	}
-	void UpdateRolesGiven(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => IsRolesGiven = false;
+	void UpdateRolesGiven(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => CanStart = false;
 
 	public override void OnStart()
 	{
 		_playersViewModel.Players.CollectionChanged += UpdateRolesGiven;
+		// Check if game can be continued
+		CanContinue = _windowModel.SavedViewModel != null;
+		CanStart = CanStart && !Players.Where(player => player.Role == PlayerRole.None).Any();
 	}
 
 	public override void OnEnd()
 	{
-		_playersViewModel.Players.CollectionChanged -= UpdateRolesGiven;
 	}
 }

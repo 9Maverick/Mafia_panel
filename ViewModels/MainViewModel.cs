@@ -15,6 +15,10 @@ public interface IMainViewModel
 	/// </summary>
 	Window MainWindow { get; set; }
 	/// <summary>
+	/// ViewModel of paused game phase
+	/// </summary>
+	PhaseViewModel SavedViewModel { get; set; }
+	/// <summary>
 	/// ViewModel of content on window
 	/// </summary>
 	PhaseViewModel CurrentViewModel { get; set; }
@@ -54,8 +58,13 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 	ISocialMediaProvider _socialMediaProvider;
 	IPlayersViewModel _playersViewModel;
 	IGameRulesModel _gameRules;
-	ObservableCollection<Player> Players => _playersViewModel.Players;
+	ObservableCollection<Player> Players => _playersViewModel.ActivePlayers;
 	PhaseViewModel _savedViewModel;
+	public PhaseViewModel SavedViewModel
+	{
+		get => _savedViewModel;
+		set => SetValue(ref _savedViewModel, value);
+	}
 	PhaseViewModel _currentViewModel;
 	public PhaseViewModel CurrentViewModel
 	{
@@ -103,7 +112,7 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 		chatMessage += "Status:" + "\n";
 
 		// Getting information for each player
-		foreach (Player player in _playersViewModel.Players)
+		foreach (Player player in _playersViewModel.ActivePlayers)
 		{
 			message += $"{player.Name} - " + player.Role.ToString() + " - " + player.Status.ToString() + "\n";
 			chatMessage += $"{player.Name} - " + player.Status.ToString() + "\n";
@@ -117,7 +126,7 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 		if(isStart)
 		{
 			// Send to each player information about their roles
-			foreach (var player in _playersViewModel.Players)
+			foreach (var player in _playersViewModel.ActivePlayers)
 			{
 				if (player.User != null) player.User.SendMessage(Templates.RoleTemplates[player.Role]);
 			}
@@ -160,7 +169,7 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 	void Win(string winner)
 	{
 		_socialMediaProvider.SendToChat($"Game over, {winner}  wins");
-		_playersViewModel.LoadBackup();
+		_playersViewModel.LoadPlayers();
 		_savedViewModel = null;
 		SwitchCurrentViewModelTo<SettingsViewModel>();
 	}
@@ -181,6 +190,7 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 	{
 		if (_savedViewModel == null) return false;
 		CurrentViewModel = _savedViewModel;
+		_savedViewModel = null;
 		return true;
 	}
 

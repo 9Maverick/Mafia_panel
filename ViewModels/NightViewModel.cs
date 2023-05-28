@@ -52,7 +52,7 @@ public class NightViewModel : PhaseViewModel
 		get => _isAlternativeActionVisible;
 		set => SetValue(ref _isAlternativeActionVisible, value);
 	}
-	public ObservableCollection<Player> Players => _playersViewModel.Players;
+	public ObservableCollection<Player> Players => _playersViewModel.ActivePlayers;
 
 	public NightViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, DiscordClientModel discordClient, IMainViewModel windowModel)
 	{

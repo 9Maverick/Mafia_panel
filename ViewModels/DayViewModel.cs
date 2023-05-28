@@ -14,7 +14,7 @@ internal class DayViewModel : PhaseViewModel
 	IPlayersViewModel _playersViewModel;
 	IMainViewModel _windowModel;
 	ISocialMediaProvider _socialMediaProvider;
-	public ObservableCollection<Player> Players => _playersViewModel.Players;
+	public ObservableCollection<Player> Players => _playersViewModel.ActivePlayers;
 	Player _selectedPlayer;
 	public Player SelectedPlayer
 	{

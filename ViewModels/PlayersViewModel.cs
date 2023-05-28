@@ -12,10 +12,14 @@ public interface IPlayersViewModel
 	/// <summary>
 	/// List of active players in the game
 	/// </summary>
+	ObservableCollection<Player> ActivePlayers { get; set; }
+	/// <summary>
+	/// List of all players
+	/// </summary>
 	ObservableCollection<Player> Players { get; set; }
 
 	/// <summary>
-	/// Clears killed players from <see cref="Players"/>
+	/// Clears killed players from <see cref="ActivePlayers"/>
 	/// </summary>
 	void ClearKilled();
 	/// <summary>
@@ -23,13 +27,9 @@ public interface IPlayersViewModel
 	/// </summary>
 	void ClearStatus();
 	/// <summary>
-	/// Saves <see cref="Players"/>
+	/// Loads <see cref="ActivePlayers"/>
 	/// </summary>
-	void SaveBackup();
-	/// <summary>
-	/// Loads <see cref="Players"/>
-	/// </summary>
-	void LoadBackup();
+	void LoadPlayers();
 	/// <summary>
 	/// 
 	/// </summary>
@@ -40,33 +40,39 @@ public interface IPlayersViewModel
 
 public class PlayersViewModel : NotifyPropertyChanged, IPlayersViewModel
 {
-	ObservableCollection<Player> _players;
+	ObservableCollection<Player> _activePlayers;
 	IGameRulesModel _gameRules;
+	public ObservableCollection<Player> ActivePlayers
+	{
+		get => _activePlayers;
+		set => SetValue(ref _activePlayers, value);
+	}
+	ObservableCollection<Player> _players;
 	public ObservableCollection<Player> Players
 	{
 		get => _players;
 		set => SetValue(ref _players, value);
 	}
-	ObservableCollection<Player> _playersBackup;
 	public PlayersViewModel(IGameRulesModel gameRules)
 	{
 		_gameRules = gameRules;
+		_activePlayers = new ObservableCollection<Player>();
 		_players = new ObservableCollection<Player>();
-		_playersBackup = new ObservableCollection<Player>();
 	}
 	public void ClearKilled()
 	{
-		Players.Where(player => player.Status == PlayerStatus.Killed)
+		ActivePlayers.Where(player => player.Status == PlayerStatus.Killed)
 			.ToList()
-			.All(Players.Remove);
-		if (Players.Where(player => player.Role == PlayerRole.Godfather).Count() == 0)
+			.All(ActivePlayers.Remove);
+		if (ActivePlayers.Where(player => player.Role == PlayerRole.Godfather).Count() == 0 
+			&& ActivePlayers.Where(player => player.Role == PlayerRole.Mafioso).Any())
 		{
 			GodfatherInherit();
 		}
 	}
 	public void ClearStatus()
 	{
-		foreach (var player in Players)
+		foreach (var player in ActivePlayers)
 		{
 			if ( (player.Status == PlayerStatus.StunnedNight) || (player.Status == PlayerStatus.Defended && _gameRules.IsDefenseStunning) )
 			{
@@ -81,15 +87,18 @@ public class PlayersViewModel : NotifyPropertyChanged, IPlayersViewModel
 	}
 	void GodfatherInherit()
 	{
-		List<Player> selectedPlayers = new List<Player>(Players.Where(player => player.Role == PlayerRole.Mafioso));
+		List<Player> selectedPlayers = new List<Player>(ActivePlayers.Where(player => player.Role == PlayerRole.Mafioso));
 
 		if (selectedPlayers.Count == 0) return;
 
 		var newGodfather = selectedPlayers[Random.Shared.Next(selectedPlayers.Count)];
 
-		Players[Players.IndexOf(newGodfather)] = new Godfather(newGodfather);
+		ActivePlayers[ActivePlayers.IndexOf(newGodfather)] = new Godfather(newGodfather);
 	}
-	public void SaveBackup() => _playersBackup = new ObservableCollection<Player>(Players);
-	public void LoadBackup() => Players = new ObservableCollection<Player>(_playersBackup);
+	public void LoadPlayers()
+	{
+		ActivePlayers = new ObservableCollection<Player>(Players);
+		ClearStatus();
+	}
 	public Player? GetPlayerByUserId(long id) => Players.FirstOrDefault(player => player.User != null && player.User.Id == id);
 }
