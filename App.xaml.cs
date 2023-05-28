@@ -25,7 +25,7 @@ public partial class App : Application
 				services.AddSingleton<DiscordClientModel>();
 				services.AddSingleton<SocialMediaProvider>();
 				services.AddSingleton<ISocialMediaProvider, SocialMediaProvider>(services => services.GetRequiredService<SocialMediaProvider>());
-				services.AddSingleton<IMainViewModel, MainViewModel>();
+				services.AddSingleton<MainViewModel>();
 				services.AddSingleton<MainWindow>();
 				services.AddSingleton<SettingsViewModel>();
 				services.AddSingleton<DayViewModel>();

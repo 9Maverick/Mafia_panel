@@ -14,8 +14,8 @@ public class NightViewModel : PhaseViewModel
 	IPlayersViewModel _playersViewModel;
 	IGameRulesModel _mode;
 	ISocialMediaProvider _socialMediaProvider;
-	IMainViewModel _windowModel;
-
+	MainViewModel _windowModel;
+		
 	Player _actorPlayer;
 	public Player ActorPlayer
 	{
@@ -54,7 +54,7 @@ public class NightViewModel : PhaseViewModel
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.ActivePlayers;
 
-	public NightViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, DiscordClientModel discordClient, IMainViewModel windowModel)
+	public NightViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, DiscordClientModel discordClient, MainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;

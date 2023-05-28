@@ -8,64 +8,25 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Mafia_panel.ViewModels;
 
-public interface IMainViewModel
-{
-	/// <summary>
-	/// Instance of Application window
-	/// </summary>
-	Window MainWindow { get; set; }
-	/// <summary>
-	/// ViewModel of paused game phase
-	/// </summary>
-	PhaseViewModel SavedViewModel { get; set; }
-	/// <summary>
-	/// ViewModel of content on window
-	/// </summary>
-	PhaseViewModel CurrentViewModel { get; set; }
-
-	// Commands for window controls
-	Command CloseCommand { get; }
-	Command MaximizeCommand { get; }
-	Command MinimizeCommand { get; }
-	/// <summary>
-	/// Navigates to settings
-	/// </summary>
-	Command MenuCommand { get; }
-
-	/// <summary>
-	/// Checks if it's time to end the game
-	/// </summary>
-	bool IsGameOver();
-	/// <summary>
-	/// Changes <see cref="CurrentViewModel"/>
-	/// </summary>
-	/// <typeparam name="T">Exact type of ViewModel to switch</typeparam>
-	void SwitchCurrentViewModelTo<T>() where T : PhaseViewModel;
-	/// <summary>
-	/// Clears players and statuses, checks <see cref="IsGameOver"/> and <see cref="SwitchCurrentViewModelTo{T}"/>
-	/// </summary>
-	/// <typeparam name="T">Exact type of next stage ViewModel</typeparam>
-	public void NextPhase<T>(bool isStart = false) where T : PhaseViewModel;
-	/// <summary>
-	/// Sets <see cref="CurrentViewModel"/> to last ViewModel 
-	/// </summary>
-	/// <returns>Whether the operation was successful</returns>
-	bool TryContinue();
-}
-
-public class MainViewModel : NotifyPropertyChanged, IMainViewModel
+public class MainViewModel : NotifyPropertyChanged
 {
 	ISocialMediaProvider _socialMediaProvider;
 	IPlayersViewModel _playersViewModel;
 	IGameRulesModel _gameRules;
 	ObservableCollection<Player> Players => _playersViewModel.ActivePlayers;
 	PhaseViewModel _savedViewModel;
+	/// <summary>
+	/// ViewModel of paused game phase
+	/// </summary>
 	public PhaseViewModel SavedViewModel
 	{
 		get => _savedViewModel;
 		set => SetValue(ref _savedViewModel, value);
 	}
 	PhaseViewModel _currentViewModel;
+	/// <summary>
+	/// ViewModel of content on window
+	/// </summary>
 	public PhaseViewModel CurrentViewModel
 	{
 		get => _currentViewModel;
@@ -77,6 +38,9 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 		}
 	}
 	private Window _window;
+	/// <summary>
+	/// Instance of Application window
+	/// </summary>
 	public Window MainWindow
 	{
 		get => _window;
@@ -89,10 +53,18 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 		_socialMediaProvider = socialMediaProvider;
 		_gameRules = gameModeModel;
 	}
+	/// <summary>
+	/// Changes <see cref="CurrentViewModel"/>
+	/// </summary>
+	/// <typeparam name="T">Exact type of ViewModel to switch</typeparam>
 	public void SwitchCurrentViewModelTo<T>() where T : PhaseViewModel
 	{
 		CurrentViewModel = App.Host.Services.GetRequiredService<T>();
 	}
+	/// <summary>
+	/// Clears players and statuses, checks <see cref="IsGameOver"/> and <see cref="SwitchCurrentViewModelTo{T}"/>
+	/// </summary>
+	/// <typeparam name="T">Exact type of next stage ViewModel</typeparam>
 	public void NextPhase<T>(bool isStart = false) where T : PhaseViewModel
 	{
 		string message = "";
@@ -136,6 +108,9 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 
 		SwitchCurrentViewModelTo<T>();
 	}
+	/// <summary>
+	/// Checks if it's time to end the game
+	/// </summary>
 	public bool IsGameOver()
 	{
 		// Geting number of players in each side
@@ -186,6 +161,10 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 		_savedViewModel = CurrentViewModel;
 		SwitchCurrentViewModelTo<SettingsViewModel>();
 	}
+	/// <summary>
+	/// Sets <see cref="CurrentViewModel"/> to last ViewModel 
+	/// </summary>
+	/// <returns>Whether the operation was successful</returns>
 	public bool TryContinue()
 	{
 		if (_savedViewModel == null) return false;
@@ -194,6 +173,7 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 		return true;
 	}
 
+	// Commands for window controls
 	private Command _minimizeCommand;
 	public Command MinimizeCommand
 	{
@@ -211,6 +191,9 @@ public class MainViewModel : NotifyPropertyChanged, IMainViewModel
 	{
 		get => _closeCommand ?? (_closeCommand = new Command(obj => MainWindow.Close()));
 	}
+	/// <summary>
+	/// Navigates to settings
+	/// </summary>
 	private Command _menuCommand;
 	public Command MenuCommand
 	{

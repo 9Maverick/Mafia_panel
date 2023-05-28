@@ -5,7 +5,7 @@ namespace Mafia_panel;
 
 public partial class MainWindow : Window
 {
-	public MainWindow(IMainViewModel mainViewModel)
+	public MainWindow(MainViewModel mainViewModel)
 	{
 		DataContext = mainViewModel;
 		mainViewModel.MainWindow = this;

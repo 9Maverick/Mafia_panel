@@ -11,7 +11,7 @@ namespace Mafia_panel.ViewModels;
 internal class SettingsViewModel : PhaseViewModel
 {
 	IPlayersViewModel _playersViewModel;
-	IMainViewModel _windowModel;
+	MainViewModel _windowModel;
 
 	DiscordClientModel _discordClient;
 	public DiscordClientModel DiscordClientModel
@@ -53,7 +53,7 @@ internal class SettingsViewModel : PhaseViewModel
 		set => SetValue(ref _canContinue, value);
 	}
 
-	public SettingsViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, SocialMediaProvider socialMediaProvider, IMainViewModel windowModel)
+	public SettingsViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, SocialMediaProvider socialMediaProvider, MainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;

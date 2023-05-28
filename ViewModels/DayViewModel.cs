@@ -12,7 +12,7 @@ internal class DayViewModel : PhaseViewModel
 {
 	List<Player> _maxVotedPlayers; 
 	IPlayersViewModel _playersViewModel;
-	IMainViewModel _windowModel;
+	MainViewModel _windowModel;
 	ISocialMediaProvider _socialMediaProvider;
 	public ObservableCollection<Player> Players => _playersViewModel.ActivePlayers;
 	Player _selectedPlayer;
@@ -27,7 +27,7 @@ internal class DayViewModel : PhaseViewModel
 		get => _targetName;
 		set => SetValue(ref _targetName, value);
 	}
-	public DayViewModel(IPlayersViewModel playersViewModel, IMainViewModel windowModel, ISocialMediaProvider socialMediaProvider)
+	public DayViewModel(IPlayersViewModel playersViewModel, MainViewModel windowModel, ISocialMediaProvider socialMediaProvider)
 	{
 		_playersViewModel = playersViewModel;
 		_windowModel = windowModel;
