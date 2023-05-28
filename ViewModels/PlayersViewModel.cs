@@ -97,7 +97,8 @@ public class PlayersViewModel : NotifyPropertyChanged, IPlayersViewModel
 	}
 	public void LoadPlayers()
 	{
-		ActivePlayers = new ObservableCollection<Player>(Players);
+		ActivePlayers.Clear();
+		Players.ToList().ForEach(ActivePlayers.Add);
 		ClearStatus();
 	}
 	public Player? GetPlayerByUserId(long id) => Players.FirstOrDefault(player => player.User != null && player.User.Id == id);
