@@ -24,6 +24,7 @@
                             <StackPanel Margin="5" Grid.Column="0">
                                 <TextBlock Grid.Column="0" FontSize="18" Text="{Binding Path=Name}" />
                                 <TextBlock Grid.Column="0" FontSize="18" Text="{Binding Path=Role}" />
+                                <TextBlock Grid.Column="0" FontSize="18" Text="{Binding Path=Status}" />
                             </StackPanel>
                             <TextBlock Grid.Column="1" Text="{Binding Path=Votes, UpdateSourceTrigger=PropertyChanged}"/>
                         </Grid>
