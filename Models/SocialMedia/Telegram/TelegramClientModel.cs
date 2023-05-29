@@ -50,9 +50,9 @@ public class TelegramClientModel : NotifyPropertyChanged, ISocialMediaProviderWi
 		_playersViewModel = playersViewModel;
 		var settings = new Dictionary<string, SocialMediaSetting>
 		{
-			{ token,        new SocialMediaSetting( typeof(string),             ControlType.TextBox,    StartClient )},
-			{ logChannel,   new SocialMediaSetting( typeof(Chat),  ControlType.ComboBox    )},
-			{ chatChannel,  new SocialMediaSetting( typeof(Chat),  ControlType.ComboBox    )}
+			{ token,        new SocialMediaSetting( typeof(string),ControlType.TextBox,    StartClient )},
+			{ logChannel,   new SocialMediaSetting( typeof(KeyValuePair<string, long>),  ControlType.ComboBox    )},
+			{ chatChannel,  new SocialMediaSetting( typeof(KeyValuePair<string, long>),  ControlType.ComboBox    )}
 		};
 		_settings = settings.AsReadOnly();
 	}
@@ -118,10 +118,20 @@ public class TelegramClientModel : NotifyPropertyChanged, ISocialMediaProviderWi
 	{
 		Settings.TryGetValue(logChannel, out var log);
 		Settings.TryGetValue(chatChannel, out var chat);
+		var cht = update.Message.Chat;
+		KeyValuePair<string, long> pair;
+		if (cht.Type == ChatType.Private)
+		{
+			pair = new KeyValuePair<string, long>(cht.Username, cht.Id);
+		}
+		else
+		{
+			pair = new KeyValuePair<string, long>(cht.Title, cht.Id);
+		}
 		App.Current.Dispatcher.Invoke(delegate
 		{
-			log.Source.Add(update.Message.Chat);
-			chat.Source.Add(update.Message.Chat);
+			log.Source.Add(pair);
+			chat.Source.Add(pair);
 		});
 	}
 	void JoinQuitCommandHandler(ITelegramBotClient client, Update update, Func<Chat, string> addRemove)
@@ -236,15 +246,13 @@ public class TelegramClientModel : NotifyPropertyChanged, ISocialMediaProviderWi
 	}
 	public async Task SendLog(string message)
 	{
-		var log = GetSettingValue<Chat>(logChannel);
-		if (log == null) return;
-		await _client.SendTextMessageAsync(new ChatId(log.Id), message);
+		var log = GetSettingValue<KeyValuePair<string,long>>(logChannel);
+		await _client.SendTextMessageAsync(new ChatId(log.Value), message);
 	}
 
 	public async Task SendToChat(string message)
 	{
-		var chat = GetSettingValue<Chat>(chatChannel);
-		if (chat == null) return;
-		await _client.SendTextMessageAsync(new ChatId(chat.Id), message);
+		var chat = GetSettingValue<KeyValuePair<string, long>>(chatChannel);
+		await _client.SendTextMessageAsync(new ChatId(chat.Value), message);
 	}
 }
