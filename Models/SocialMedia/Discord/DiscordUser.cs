@@ -12,15 +12,11 @@ namespace Mafia_panel.Models.SocialMedia.Discord
 	public class DiscordUser : NotifyPropertyChanged, ISocialMediaUser
 	{
 		IUser _user;
-		string _name;
-		public string Name => _name;
-		long _id;
-		public long Id => _id;
+		public string Name => _user.Username;
+		public long Id => (long)_user.Id;
 		public DiscordUser(IUser user)
 		{
 			_user = user;
-			_id = (long)user.Id;
-			_name = user.Username;
 		}
 
 		public void SendMessage(string message) => _user.SendMessageAsync(message);

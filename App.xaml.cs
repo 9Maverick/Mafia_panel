@@ -3,6 +3,7 @@ using Mafia_panel.Interfaces;
 using Mafia_panel.Models;
 using Mafia_panel.Models.SocialMedia;
 using Mafia_panel.Models.SocialMedia.Discord;
+using Mafia_panel.Models.SocialMedia.Telegram;
 using Mafia_panel.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,6 +24,7 @@ public partial class App : Application
 				services.AddSingleton<IGameRulesModel, GameRulesModel>();
 				services.AddSingleton<IPlayersViewModel, PlayersViewModel>();
 				services.AddSingleton<DiscordClientModel>();
+				services.AddSingleton<TelegramClientModel>();
 				services.AddSingleton<SocialMediaProvider>();
 				services.AddSingleton<ISocialMediaProvider, SocialMediaProvider>(services => services.GetRequiredService<SocialMediaProvider>());
 				services.AddSingleton<MainViewModel>();

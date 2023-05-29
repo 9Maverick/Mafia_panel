@@ -1,6 +1,7 @@
 ﻿using Mafia_panel.Core;
 using Mafia_panel.Interfaces;
 using Mafia_panel.Models.SocialMedia.Discord;
+using Mafia_panel.Models.SocialMedia.Telegram;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -30,11 +31,12 @@ public class SocialMediaProvider : NotifyPropertyChanged, ISocialMediaProvider
         set => SetValue(ref _isActive, value);
     }
 
-    public SocialMediaProvider(DiscordClientModel discordProvider)
+    public SocialMediaProvider(DiscordClientModel discordProvider, TelegramClientModel telegramProvider)
     {
         Providers = new ObservableCollection<ISocialMediaProviderWithSettings>
         {
-            discordProvider
+            discordProvider,
+            telegramProvider
         };
         discordProvider.PropertyChanged += UpdateActivity;
         UpdateActivity();

@@ -47,5 +47,6 @@ public class SocialMediaSetting : NotifyPropertyChanged
         Type = settingType;
         _control = control;
         _valueChanged = valueChanged;
+        _source = new ObservableCollection<object>();
     }
 }

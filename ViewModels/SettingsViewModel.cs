@@ -163,7 +163,7 @@ internal class SettingsViewModel : PhaseViewModel
 	{
 		get => _notifyCommand ?? (_notifyCommand = new Command(obj =>
 		{
-			SocialMediaProvider.SendToChat("Game starting, you can join using \"/join-game\" command");
+			SocialMediaProvider.SendToChat("Game starting, you can join using \"/joingame\" command");
 		}));
 	}
 

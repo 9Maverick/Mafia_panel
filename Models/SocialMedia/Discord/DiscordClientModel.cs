@@ -72,8 +72,8 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	/// </summary>
 	void StartClient()
 	{
-		var token = GetSettingValue<string>(DiscordClientModel.token);
-		if (string.IsNullOrEmpty(token)) return;
+		var botToken = GetSettingValue<string>(token);
+		if (string.IsNullOrEmpty(botToken)) return;
 		try
 		{
 			_nightViewModel = App.Host.Services.GetRequiredService<NightViewModel>();
@@ -89,7 +89,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			_client.Ready += GetGuilds;
 			_client.Ready += ConfigureCommands;
 
-			_client.LoginAsync(TokenType.Bot, token);
+			_client.LoginAsync(TokenType.Bot, botToken);
 			_client.StartAsync();
 
 		}
