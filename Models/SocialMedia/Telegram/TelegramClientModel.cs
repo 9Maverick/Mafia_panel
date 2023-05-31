@@ -1,7 +1,5 @@
-﻿using Discord.WebSocket;
-using Mafia_panel.Core;
+﻿using Mafia_panel.Core;
 using Mafia_panel.Interfaces;
-using Mafia_panel.Models.SocialMedia.Discord;
 using Mafia_panel.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
