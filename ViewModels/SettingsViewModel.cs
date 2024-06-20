@@ -4,7 +4,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Mafia_panel.Models.SocialMedia;
-using Mafia_panel.Models.SocialMedia.Discord;
 
 namespace Mafia_panel.ViewModels;
 
@@ -12,13 +11,6 @@ internal class SettingsViewModel : PhaseViewModel
 {
 	IPlayersViewModel _playersViewModel;
 	MainViewModel _windowModel;
-
-	DiscordClientModel _discordClient;
-	public DiscordClientModel DiscordClientModel
-	{
-		get => _discordClient;
-		set => SetValue(ref _discordClient, value);
-	}
 	SocialMediaProvider _socialMediaProvider;
 	public SocialMediaProvider SocialMediaProvider
 	{

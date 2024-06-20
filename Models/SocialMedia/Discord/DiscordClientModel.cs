@@ -11,7 +11,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 
 namespace Mafia_panel.Models.SocialMedia.Discord;
 
@@ -48,11 +47,11 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 		_playersViewModel = playersViewModel;
 		var settings = new Dictionary<string, SocialMediaSetting>
 		{
-			{ token,        new SocialMediaSetting( typeof(string),				ControlType.TextBox,	StartClient )},
-			{ guild,        new SocialMediaSetting( typeof(SocketGuild),		ControlType.ComboBox,	GetGuildData)},
-			{ gameMaster,   new SocialMediaSetting( typeof(SocketGuildUser),	ControlType.ComboBox	)},
-			{ logChannel,   new SocialMediaSetting( typeof(SocketTextChannel),	ControlType.ComboBox	)},
-			{ chatChannel,  new SocialMediaSetting( typeof(SocketTextChannel),	ControlType.ComboBox	)}
+			{ token,        new SocialMediaSetting( typeof(string),             ControlType.TextBox,    StartClient )},
+			{ guild,        new SocialMediaSetting( typeof(SocketGuild),        ControlType.ComboBox,   GetGuildData)},
+			{ gameMaster,   new SocialMediaSetting( typeof(SocketGuildUser),    ControlType.ComboBox    )},
+			{ logChannel,   new SocialMediaSetting( typeof(SocketTextChannel),  ControlType.ComboBox    )},
+			{ chatChannel,  new SocialMediaSetting( typeof(SocketTextChannel),  ControlType.ComboBox    )}
 		};
 		_settings = settings.AsReadOnly();
 	}
@@ -176,6 +175,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	/// <param name="msg"></param>
 	private Task Log(LogMessage msg)
 	{
+		Debug.WriteLine(msg);
 		Trace.WriteLine(msg);
 		return Task.CompletedTask;
 	}
@@ -188,7 +188,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	{
 		if (msg.Source != MessageSource.User) return Task.CompletedTask;
 
-		if(msg.Content.Contains("!join-game"))
+		if (msg.Content.Contains("!join-game"))
 		{
 			if (msg.MentionedUsers.Count > 0)
 			{
@@ -204,7 +204,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			return Task.CompletedTask;
 		}
 
-		if(msg.Content.Contains("!quit-game"))
+		if (msg.Content.Contains("!quit-game"))
 		{
 			if (msg.MentionedUsers.Count > 0)
 			{
@@ -229,7 +229,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	}
 	async Task SlashCommandsHandler(SocketSlashCommand command)
 	{
-		switch(command.Data.Name)
+		switch (command.Data.Name)
 		{
 			case joinGame:
 				JoinQuitCommandHandler(command, AddPlayer);
@@ -245,7 +245,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 				break;
 		}
 	}
-	void JoinQuitCommandHandler(SocketSlashCommand command, Func<SocketUser,string> addRemove)
+	void JoinQuitCommandHandler(SocketSlashCommand command, Func<SocketUser, string> addRemove)
 	{
 		if (command.Data.Options.Count > 0)
 		{
@@ -282,7 +282,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 			return;
 		}
 		_nightViewModel.TargetPlayer = _playersViewModel.ActivePlayers[target];
-		if(!isAlternative)
+		if (!isAlternative)
 		{
 			App.Current.Dispatcher.Invoke(delegate
 			{
@@ -301,7 +301,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	void VoteCommandHandler(SocketSlashCommand command)
 	{
 		var target = (int)(long)command.Data.Options
-			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Integer).Value-1;
+			.FirstOrDefault(option => option.Type == ApplicationCommandOptionType.Integer).Value - 1;
 		var player = _playersViewModel.GetActivePlayerByUserId((long)command.User.Id);
 		if (player == null)
 		{
@@ -325,7 +325,7 @@ public class DiscordClientModel : NotifyPropertyChanged, ISocialMediaProviderWit
 	}
 	string AddPlayer(SocketUser user)
 	{
-		if (_playersViewModel.GetPlayerByUserId((long)user.Id) != null) 
+		if (_playersViewModel.GetPlayerByUserId((long)user.Id) != null)
 		{
 			return $"{user.Username} already in the game";
 		}

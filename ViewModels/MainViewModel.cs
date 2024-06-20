@@ -1,10 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using Mafia_panel.Core;
+using Mafia_panel.Interfaces;
+using Mafia_panel.Models;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using Mafia_panel.Core;
-using Mafia_panel.Models;
-using Mafia_panel.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Mafia_panel.ViewModels;
 
@@ -32,7 +32,7 @@ public class MainViewModel : NotifyPropertyChanged
 		get => _currentViewModel;
 		set
 		{
-			if(_currentViewModel != null) _currentViewModel.OnEnd();
+			if (_currentViewModel != null) _currentViewModel.OnEnd();
 			SetValue(ref _currentViewModel, value);
 			_currentViewModel.OnStart();
 		}
@@ -95,7 +95,7 @@ public class MainViewModel : NotifyPropertyChanged
 		_playersViewModel.ClearKilled();
 		_playersViewModel.ClearStatus();
 
-		if(isStart)
+		if (isStart)
 		{
 			// Send to each player information about their roles
 			foreach (var player in _playersViewModel.ActivePlayers)
@@ -153,7 +153,7 @@ public class MainViewModel : NotifyPropertyChanged
 	/// </summary>
 	void ShowMenu()
 	{
-		if(CurrentViewModel is SettingsViewModel)
+		if (CurrentViewModel is SettingsViewModel)
 		{
 			TryContinue();
 			return;

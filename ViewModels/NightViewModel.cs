@@ -1,11 +1,9 @@
 ﻿using Mafia_panel.Models;
 using Mafia_panel.Core;
 using System.Collections.ObjectModel;
-using Discord;
 using System.Linq;
 using Mafia_panel.Interfaces;
 using Mafia_panel.Models.SocialMedia.Discord;
-using System.Windows.Media.Media3D;
 
 namespace Mafia_panel.ViewModels;
 
@@ -54,7 +52,7 @@ public class NightViewModel : PhaseViewModel
 	}
 	public ObservableCollection<Player> Players => _playersViewModel.ActivePlayers;
 
-	public NightViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, DiscordClientModel discordClient, MainViewModel windowModel)
+	public NightViewModel(IPlayersViewModel playersViewModel, IGameRulesModel mode, ISocialMediaProvider discordClient, MainViewModel windowModel)
 	{
 		_playersViewModel = playersViewModel;
 		_mode = mode;

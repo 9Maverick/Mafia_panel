@@ -1,5 +1,4 @@
-﻿using Mafia_panel.Core;
-using Mafia_panel.Interfaces;
+﻿using Mafia_panel.Interfaces;
 using Mafia_panel.Models;
 using Mafia_panel.Models.SocialMedia;
 using Mafia_panel.Models.SocialMedia.Discord;

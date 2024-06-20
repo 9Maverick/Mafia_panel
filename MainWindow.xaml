@@ -53,6 +53,8 @@
 
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                                                 Grid.Column="1">
+                                        <TextBlock HorizontalAlignment="Center">Mafia panel by Vladyslav Nesterenko</TextBlock>
+                                        <TextBlock HorizontalAlignment="Center">Group KN-1901</TextBlock>
                                     </StackPanel>
 
                                     <!-- Window controls-->
